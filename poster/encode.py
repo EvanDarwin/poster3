@@ -252,7 +252,7 @@ def multipart_encode(params, boundary=None):
     boundary string appears in the parameter values a ValueError will be
     raised.
 
-    Returns a tuple of `datagen`, `headers`, where `dataiter` is a
+    Returns a tuple of `datagen`, `headers`, where `datagen` is a
     generator that will yield blocks of data that make up the encoded
     parameters, and `headers` is a dictionary with the assoicated
     Content-Type and Content-Length headers."""
