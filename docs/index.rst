@@ -68,6 +68,10 @@ Module reference
 
    poster
 
+Download
+--------
+poster can be downloaded from http://atlee.ca/software/poster/dist
+
 Indices and tables
 ==================
 
