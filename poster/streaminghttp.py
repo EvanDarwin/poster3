@@ -78,11 +78,49 @@ class StreamingHTTPSConnection(httplib.HTTPSConnection):
 
     send = StreamingHTTPConnection.send
 
-class StreamingHTTPHandler(urllib2.AbstractHTTPHandler):
-    """Subclass of `urllib2.AbstractHTTPHandler` that uses
+class StreamingHTTPRedirectHandler(urllib2.HTTPRedirectHandler):
+    """Subclass of `urllib2.HTTPRedirectHandler` that overrides the
+    `redirect_request` method to properly handle redirected POST requests
+    """
+
+    handler_order = urllib2.HTTPRedirectHandler.handler_order - 1
+
+    # From python2.6 urllib2's HTTPRedirectHandler
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        """Return a Request or None in response to a redirect.
+
+        This is called by the http_error_30x methods when a
+        redirection response is received.  If a redirection should
+        take place, return a new Request to allow http_error_30x to
+        perform the redirect.  Otherwise, raise HTTPError if no-one
+        else should try to handle this url.  Return None if you can't
+        but another Handler might.
+        """
+        m = req.get_method()
+        if (code in (301, 302, 303, 307) and m in ("GET", "HEAD")
+            or code in (301, 302, 303) and m == "POST"):
+            # Strictly (according to RFC 2616), 301 or 302 in response
+            # to a POST MUST NOT cause a redirection without confirmation
+            # from the user (of urllib2, in this case).  In practice,
+            # essentially all clients do redirect in this case, so we
+            # do the same.
+            # be conciliant with URIs containing a space
+            newurl = newurl.replace(' ', '%20')
+            newheaders = dict((k,v) for k,v in req.headers.items()
+                              if k.lower() not in ("content-length", "content-type")
+                             )
+            return urllib2.Request(newurl,
+                           headers=newheaders,
+                           origin_req_host=req.get_origin_req_host(),
+                           unverifiable=True)
+        else:
+            raise urllib2.HTTPError(req.get_full_url(), code, msg, headers, fp)
+
+class StreamingHTTPHandler(urllib2.HTTPHandler):
+    """Subclass of `urllib2.HTTPHandler` that uses
     StreamingHTTPConnection as its http connection class."""
 
-    handler_order = urllib2.AbstractHTTPHandler.handler_order - 1
+    handler_order = urllib2.HTTPHandler.handler_order - 1
 
     def http_open(self, req):
         return self.do_open(StreamingHTTPConnection, req)
@@ -96,14 +134,14 @@ class StreamingHTTPHandler(urllib2.AbstractHTTPHandler):
                 if not req.has_header('Content-length'):
                     raise ValueError(
                             "No Content-Length specified for iterable body")
-        return urllib2.AbstractHTTPHandler.do_request_(self, req)
+        return urllib2.HTTPHandler.do_request_(self, req)
 
 if hasattr(httplib, 'HTTPS'):
-    class StreamingHTTPSHandler(urllib2.AbstractHTTPHandler):
-        """Subclass of `urllib2.AbstractHTTPHandler` that uses
+    class StreamingHTTPSHandler(urllib2.HTTPHandler):
+        """Subclass of `urllib2.HTTPSHandler` that uses
         StreamingHTTPSConnection as its http connection class."""
 
-        handler_order = urllib2.AbstractHTTPHandler.handler_order - 1
+        handler_order = urllib2.HTTPSHandler.handler_order - 1
 
         def https_open(self, req):
             return self.do_open(StreamingHTTPSConnection, req)
@@ -113,7 +151,7 @@ if hasattr(httplib, 'HTTPS'):
 def register_openers():
     """Register the streaming http handlers in the global urllib2 default
     opener object."""
-    handlers = [StreamingHTTPHandler]
+    handlers = [StreamingHTTPHandler, StreamingHTTPRedirectHandler]
     if hasattr(httplib, "HTTPS"):
         handlers.append(StreamingHTTPSHandler)
 
