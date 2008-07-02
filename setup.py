@@ -1,7 +1,26 @@
 from setuptools import setup, find_packages
-import sys, os
+from distutils.cmd import Command
 
 version = '0.1'
+
+class sphinx_command(Command):
+    description = "rebuild sphinx docs"
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        import sphinx, shutil, os
+        if os.path.exists("docs/build/html"):
+            shutil.rmtree("docs/build/html")
+
+        self.mkpath("docs/build/html")
+
+        sphinx.main(["-E", "docs", "docs/build/html"])
 
 setup(name='poster',
       version=version,
@@ -24,9 +43,12 @@ parameters""",
       author_email='chris@atlee.ca',
       url='http://atlee.ca/software/poster',
       license='MIT',
-      packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
+      packages=find_packages(exclude='tests'),
       include_package_data=True,
       zip_safe=True,
-      install_requires=[],
-      entry_points="",
+      extras_require = {'poster': ["buildutils", "sphinx"]},
+      tests_require = ["nose"],
+      test_suite = 'nose.collector',
+      #entry_points="",
+      cmdclass={'sphinx': sphinx_command},
       )
