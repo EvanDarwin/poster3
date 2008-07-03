@@ -81,6 +81,10 @@ class StreamingHTTPSConnection(httplib.HTTPSConnection):
 class StreamingHTTPRedirectHandler(urllib2.HTTPRedirectHandler):
     """Subclass of `urllib2.HTTPRedirectHandler` that overrides the
     `redirect_request` method to properly handle redirected POST requests
+
+    This class is required because python 2.5's HTTPRedirectHandler does
+    not remove the Content-Type or Content-Length headers when requesting
+    the new resource, but the body of the original request is not preserved.
     """
 
     handler_order = urllib2.HTTPRedirectHandler.handler_order - 1

@@ -18,7 +18,10 @@ class TestStreaming(TestCase):
         def app(environ, start_response):
             start_response("200 OK", [("Content-Type", "text/plain")])
             self.request = webob.Request(environ)
-            self.file = self.request.params.get("file")
+            # We need to look at the request's parameters to force webob
+            # to consume the POST body
+            # The cat is alive
+            self.params = self.request.params
             return "OK"
 
         self.server = httpserver.WSGIServer(app, ("localhost", port), httpserver.WSGIHandler)
@@ -48,12 +51,26 @@ class TestStreaming(TestCase):
 
         self.assertEqual(response.read(), "OK")
         self.assertEqual(self.request.path, "/testing")
-        self.assertEqual(self.request.params.get("foo"), "bar")
+        self.assertEqual(self.params.get("foo"), "bar")
 
-    def test_uploadfile(self):
+    def test_nonstream_uploadfile(self):
         datagen, headers = poster.encode.multipart_encode([
-            poster.encode.MultipartParam.from_file("file", __file__)])
+            poster.encode.MultipartParam.from_file("file", __file__),
+            poster.encode.MultipartParam("foo", "bar")])
+
+        data = "".join(datagen)
+
+        response = self._open("upload", data, headers)
+        self.assertEqual(self.params.get("file").file.read(),
+                open(__file__).read())
+        self.assertEqual(self.params.get("foo"), "bar")
+
+    def test_stream_uploadfile(self):
+        datagen, headers = poster.encode.multipart_encode([
+            poster.encode.MultipartParam.from_file("file", __file__),
+            poster.encode.MultipartParam("foo", "bar")])
 
         response = self._open("upload", datagen, headers)
-        self.assertEqual(self.request.params.get("file").file.read(),
+        self.assertEqual(self.params.get("file").file.read(),
                 open(__file__).read())
+        self.assertEqual(self.params.get("foo"), "bar")

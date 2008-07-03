@@ -60,6 +60,23 @@ the :class:`poster.encode.MultipartParam` class::
 
     datagen, headers = multipart_encode([image_param])
 
+Roadmap
+-------
+
+0.1:
+    - First release, used on internal projects
+
+0.2 (future):
+    - Bug fixes from 0.1
+    - Adjust API
+
+0.9 (future):
+    - Finalize API
+
+1.0 (future):
+    - Bug fixes from 0.9
+    - No new features
+
 Module reference
 ----------------
 
