@@ -24,12 +24,13 @@ class sphinx_command(Command):
 
 setup(name='poster',
       version=version,
-      description="Streaming upload support over HTTP",
-      long_description="""The modules in the Python standard library don't
-provide a way to upload large files via HTTP without having to load the
-entire file into memory first.  poster provides support for both streaming
-POST requests as well as multipart/form-data encoding of string or file
-parameters""",
+      description="Streaming HTTP uploads and multipart/form-data encoding",
+      long_description="""\
+The modules in the Python standard library don't provide a way to upload large
+files via HTTP without having to load the entire file into memory first.
+
+poster provides support for both streaming POST requests as well as
+multipart/form-data encoding of string or file parameters""",
       classifiers=[
           "Intended Audience :: Developers",
           "License :: OSI Approved :: MIT License",
@@ -42,6 +43,7 @@ parameters""",
       author='Chris AtLee',
       author_email='chris@atlee.ca',
       url='http://atlee.ca/software/poster',
+      download_url='http://atlee.ca/software/poster/dist/%s' % version,
       license='MIT',
       packages=find_packages(exclude='tests'),
       include_package_data=True,
