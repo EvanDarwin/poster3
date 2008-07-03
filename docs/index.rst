@@ -89,6 +89,8 @@ Download
 --------
 poster can be downloaded from http://atlee.ca/software/poster/dist
 
+You can browse the source at http://atlee.ca/vcs/poster
+
 Indices and tables
 ==================
 
