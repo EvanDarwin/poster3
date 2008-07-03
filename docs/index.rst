@@ -63,7 +63,7 @@ the :class:`poster.encode.MultipartParam` class::
 Roadmap
 -------
 
-0.1 (2008-06-02):
+0.1 (2008-07-02):
     - First release, used on internal projects
 
 0.2 (future):
