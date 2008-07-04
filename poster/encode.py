@@ -47,7 +47,13 @@ class MultipartParam(object):
     def __init__(self, name, value=None, filename=None, filetype=None,
                         filesize=None, fileobj=None):
         self.name = encode_and_quote(name)
-        self.value = encode_and_quote(value)
+        if value is None:
+            self.value = None
+        else:
+            if isinstance(value, unicode):
+                self.value = value.encode("utf-8")
+            else:
+                self.value = str(value)
         self.filename = encode_and_quote(filename)
         self.filetype = encode_and_quote(filetype)
         self.filesize = filesize
@@ -142,8 +148,10 @@ class MultipartParam(object):
 
         headers.append("Content-Type: %s" % filetype)
 
-        if self.filesize:
+        if self.filesize is not None:
             headers.append("Content-Length: %i" % self.filesize)
+        else:
+            headers.append("Content-Length: %i" % len(self.value))
 
         headers.append("")
         headers.append("")

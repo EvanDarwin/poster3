@@ -11,6 +11,7 @@ class TestEncode_String(TestCase):
         expected = unix2dos("""--XXXXXXXXX
 Content-Disposition: form-data; name="foo"
 Content-Type: text/plain; charset=utf-8
+Content-Length: 3
 
 bar
 """)
@@ -21,6 +22,7 @@ bar
         expected = unix2dos("""--XXXXXXXXX
 Content-Disposition: form-data; name="foo+baz"
 Content-Type: text/plain; charset=utf-8
+Content-Length: 3
 
 bar
 """)
@@ -31,8 +33,9 @@ bar
         expected = unix2dos("""--XXXXXXXXX
 Content-Disposition: form-data; name="foo"
 Content-Type: text/plain; charset=utf-8
+Content-Length: 11
 
-bar+baz%40bat
+bar baz@bat
 """)
         self.assertEqual(expected,
                 poster.encode.encode_string("XXXXXXXXX", "foo", "bar baz@bat"))
@@ -41,6 +44,7 @@ bar+baz%40bat
         expected = unix2dos("""--ABC+DEF
 Content-Disposition: form-data; name="foo"
 Content-Type: text/plain; charset=utf-8
+Content-Length: 3
 
 bar
 """)
@@ -51,8 +55,9 @@ bar
         expected = unix2dos("""--XXXXXXXXX
 Content-Disposition: form-data; name="foo"
 Content-Type: text/plain; charset=utf-8
+Content-Length: 4
 
-b%C3%A1r
+b\xc3\xa1r
 """)
         self.assertEqual(expected,
                 poster.encode.encode_string("XXXXXXXXX", "foo", u"bár"))
@@ -124,6 +129,7 @@ class TestMultiparam(TestCase):
         expected = unix2dos("""--XYZXYZXYZ
 Content-Disposition: form-data; name="foo"
 Content-Type: text/plain; charset=utf-8
+Content-Length: 3
 
 bar
 """)
