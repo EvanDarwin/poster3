@@ -74,6 +74,16 @@ Content-Length: 42
         self.assertEqual(expected,
                 poster.encode.encode_file_header("XXXXXXXXX", "foo", 42))
 
+    def test_content_type(self):
+        expected = unix2dos("""--XXXXXXXXX
+Content-Disposition: form-data; name="foo"
+Content-Type: text/html
+Content-Length: 42
+
+""")
+        self.assertEqual(expected,
+                poster.encode.encode_file_header("XXXXXXXXX", "foo", 42, filetype="text/html"))
+
     def test_filename_simple(self):
         expected = unix2dos("""--XXXXXXXXX
 Content-Disposition: form-data; name="foo"; filename=test.txt

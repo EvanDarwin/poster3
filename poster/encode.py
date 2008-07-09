@@ -55,7 +55,12 @@ class MultipartParam(object):
             else:
                 self.value = str(value)
         self.filename = encode_and_quote(filename)
-        self.filetype = encode_and_quote(filetype)
+        if filetype is None:
+            self.filetype = None
+        elif isinstance(filetype, unicode):
+            self.filetype = filetype.encode("utf-8")
+        else:
+            self.filetype = str(filetype)
         self.filesize = filesize
         self.fileobj = fileobj
 
