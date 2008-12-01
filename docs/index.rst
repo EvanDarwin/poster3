@@ -66,8 +66,10 @@ Roadmap
 0.1 (2008-07-02):
     - First release, used on internal projects
 
-0.2 (future):
+0.2 (2008-12-01):
     - Bug fixes from 0.1
+
+0.3 (future):
     - Adjust API
 
 0.9 (future):
