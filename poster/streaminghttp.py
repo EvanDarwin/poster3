@@ -141,7 +141,7 @@ class StreamingHTTPHandler(urllib2.HTTPHandler):
         return urllib2.HTTPHandler.do_request_(self, req)
 
 if hasattr(httplib, 'HTTPS'):
-    class StreamingHTTPSHandler(urllib2.HTTPHandler):
+    class StreamingHTTPSHandler(urllib2.HTTPSHandler):
         """Subclass of `urllib2.HTTPSHandler` that uses
         StreamingHTTPSConnection as its http connection class."""
 
