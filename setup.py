@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 from distutils.cmd import Command
 
-version = '0.2'
+version = '0.3'
 
 class sphinx_command(Command):
     description = "rebuild sphinx docs"
