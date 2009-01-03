@@ -86,7 +86,7 @@ Content-Length: 42
 
     def test_filename_simple(self):
         expected = unix2dos("""--XXXXXXXXX
-Content-Disposition: form-data; name="foo"; filename=test.txt
+Content-Disposition: form-data; name="foo"; filename="test.txt"
 Content-Type: text/plain; charset=utf-8
 Content-Length: 42
 
@@ -97,14 +97,24 @@ Content-Length: 42
 
     def test_quote_filename(self):
         expected = unix2dos("""--XXXXXXXXX
-Content-Disposition: form-data; name="foo"; filename=test%24file.txt
+Content-Disposition: form-data; name="foo"; filename="test file.txt"
 Content-Type: text/plain; charset=utf-8
 Content-Length: 42
 
 """)
         self.assertEqual(expected,
                 poster.encode.encode_file_header("XXXXXXXXX", "foo", 42,
-                    "test$file.txt"))
+                    "test file.txt"))
+
+        expected = unix2dos("""--XXXXXXXXX
+Content-Disposition: form-data; name="foo"; filename="test\\"file.txt"
+Content-Type: text/plain; charset=utf-8
+Content-Length: 42
+
+""")
+        self.assertEqual(expected,
+                poster.encode.encode_file_header("XXXXXXXXX", "foo", 42,
+                    "test\"file.txt"))
 
 class TestEncodeAndQuote(TestCase):
     def test(self):
@@ -142,9 +152,10 @@ Content-Type: text/plain; charset=utf-8
 Content-Length: 3
 
 bar
+--XYZXYZXYZ--
 """)
-        self.assertEqual(p.encode(boundary), expected)
-        self.assertEqual(p.get_size(boundary), len(expected))
+        self.assertEqual(p.encode(boundary), expected[:-len(boundary)-6])
+        self.assertEqual(p.get_size(boundary), len(expected)-len(boundary)-6)
         self.assertEqual(poster.encode.get_body_size([p], boundary),
                 len(expected))
         self.assertEqual(poster.encode.get_headers([p], boundary),

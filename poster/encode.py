@@ -54,7 +54,14 @@ class MultipartParam(object):
                 self.value = value.encode("utf-8")
             else:
                 self.value = str(value)
-        self.filename = encode_and_quote(filename)
+        if filename is None:
+            self.filename = None
+        else:
+            if isinstance(filename, unicode):
+                self.filename = filename.encode("utf-8").encode("string_escape").replace('"', '\\"')
+            else:
+                self.filename = filename.encode("string_escape").replace('"', '\\"')
+
         if filetype is None:
             self.filetype = None
         elif isinstance(filetype, unicode):
@@ -139,7 +146,7 @@ class MultipartParam(object):
         headers = ["--%s" % boundary]
 
         if self.filename:
-            disposition = 'form-data; name="%s"; filename=%s' % (self.name,
+            disposition = 'form-data; name="%s"; filename="%s"' % (self.name,
                     self.filename)
         else:
             disposition = 'form-data; name="%s"' % self.name
@@ -241,7 +248,8 @@ def encode_file_header(boundary, paramname, filesize, filename=None,
 def get_body_size(params, boundary):
     """Returns the number of bytes that the multipart/form-data encoding
     of ``params`` will be."""
-    return sum(p.get_size(boundary) for p in MultipartParam.from_params(params))
+    size = sum(p.get_size(boundary) for p in MultipartParam.from_params(params))
+    return size + len(boundary) + 6
 
 def get_headers(params, boundary):
     """Returns a dictionary with Content-Type and Content-Length headers
@@ -283,5 +291,6 @@ def multipart_encode(params, boundary=None):
         for param in params:
             for block in param.iter_encode(boundary):
                 yield block
+        yield "--%s--\r\n" % boundary
 
     return yielder(), headers

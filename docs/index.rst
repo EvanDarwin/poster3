@@ -69,8 +69,10 @@ Roadmap
 0.2 (2008-12-01):
     - Bug fixes from 0.1
 
-0.3 (future):
-    - Adjust API
+0.3 (2009-01-02):
+    - Bug fixes from 0.2:
+       - Use quoted-string encoding for filename parameter
+       - Terminate encoded document with MIME boundary (Thanks to Stephen Waterbury)
 
 0.9 (future):
     - Finalize API
@@ -89,9 +91,7 @@ Module reference
 
 Download
 --------
-poster can be downloaded from http://atlee.ca/software/poster/dist
-
-You can browse the source at http://atlee.ca/vcs/poster
+poster can be downloaded from http://atlee.ca/software/poster/dist/0.3
 
 Indices and tables
 ==================
