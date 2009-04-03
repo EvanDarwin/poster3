@@ -28,10 +28,7 @@ Example usage:
 import httplib, urllib2, socket
 from httplib import NotConnected
 
-class StreamingHTTPConnection(httplib.HTTPConnection):
-    """Subclass of `httplib.HTTPConnection` that overrides the `send()` method
-    to support iterable body objects"""
-
+class _StreamingHTTPMixin:
     def send(self, value):
         """Send ``value`` to the server.
         
@@ -72,11 +69,13 @@ class StreamingHTTPConnection(httplib.HTTPConnection):
                 self.close()
             raise
 
-class StreamingHTTPSConnection(httplib.HTTPSConnection):
-    """Subclass of `httplib.HTTSConnection` that overrides the `send()` method
+class StreamingHTTPConnection(_StreamingHTTPMixin, httplib.HTTPConnection):
+    """Subclass of `httplib.HTTPConnection` that overrides the `send()` method
     to support iterable body objects"""
 
-    send = StreamingHTTPConnection.send
+class StreamingHTTPSConnection(_StreamingHTTPMixin, httplib.HTTPSConnection):
+    """Subclass of `httplib.HTTSConnection` that overrides the `send()` method
+    to support iterable body objects"""
 
 class StreamingHTTPRedirectHandler(urllib2.HTTPRedirectHandler):
     """Subclass of `urllib2.HTTPRedirectHandler` that overrides the
@@ -150,7 +149,17 @@ if hasattr(httplib, 'HTTPS'):
         def https_open(self, req):
             return self.do_open(StreamingHTTPSConnection, req)
 
-        https_request = StreamingHTTPHandler.http_request
+        def https_request(self, req):
+            # Make sure that if we're using an iterable object as the request
+            # body, that we've also specified Content-Length
+            if req.has_data():
+                data = req.get_data()
+                if not hasattr(data, 'read') and hasattr(data, 'next'):
+                    if not req.has_header('Content-length'):
+                        raise ValueError(
+                                "No Content-Length specified for iterable body")
+            return urllib2.HTTPSHandler.do_request_(self, req)
+
 
 def register_openers():
     """Register the streaming http handlers in the global urllib2 default
