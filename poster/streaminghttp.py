@@ -28,6 +28,12 @@ Example usage:
 import httplib, urllib2, socket
 from httplib import NotConnected
 
+__all__ = ['StreamingHTTPConnection', 'StreamingHTTPRedirectHandler',
+        'StreamingHTTPHandler', 'register_openers']
+
+if hasattr(httplib, 'HTTPS'):
+    __all__.extend(['StreamingHTTPSHandler', 'StreamingHTTPSConnection'])
+
 class _StreamingHTTPMixin:
     def send(self, value):
         """Send ``value`` to the server.
@@ -71,10 +77,6 @@ class _StreamingHTTPMixin:
 
 class StreamingHTTPConnection(_StreamingHTTPMixin, httplib.HTTPConnection):
     """Subclass of `httplib.HTTPConnection` that overrides the `send()` method
-    to support iterable body objects"""
-
-class StreamingHTTPSConnection(_StreamingHTTPMixin, httplib.HTTPSConnection):
-    """Subclass of `httplib.HTTSConnection` that overrides the `send()` method
     to support iterable body objects"""
 
 class StreamingHTTPRedirectHandler(urllib2.HTTPRedirectHandler):
@@ -140,6 +142,10 @@ class StreamingHTTPHandler(urllib2.HTTPHandler):
         return urllib2.HTTPHandler.do_request_(self, req)
 
 if hasattr(httplib, 'HTTPS'):
+    class StreamingHTTPSConnection(_StreamingHTTPMixin, httplib.HTTPSConnection):
+        """Subclass of `httplib.HTTSConnection` that overrides the `send()` method
+        to support iterable body objects"""
+
     class StreamingHTTPSHandler(urllib2.HTTPSHandler):
         """Subclass of `urllib2.HTTPSHandler` that uses
         StreamingHTTPSConnection as its http connection class."""
