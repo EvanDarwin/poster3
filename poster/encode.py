@@ -12,10 +12,12 @@ __all__ = ['gen_boundary', 'encode_and_quote', 'MultipartParam',
 try:
     import uuid
     def gen_boundary():
+        """Returns a random string to use as the boundary for a message"""
         return uuid.uuid4().hex
 except ImportError:
     import random, sha
     def gen_boundary():
+        """Returns a random string to use as the boundary for a message"""
         bits = random.getrandbits(160)
         return sha.new(str(bits)).hexdigest()
 
