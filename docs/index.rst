@@ -74,7 +74,7 @@ Roadmap
        - Use quoted-string encoding for filename parameter
        - Terminate encoded document with MIME boundary (Thanks to Stephen Waterbury)
 
-0.4 (2009-04-03):
+0.4 (2009-04-05):
     - Added __all__ attributes to modules
     - Bug fixes from 0.3:
         - Fix connections to HTTPS.  Thanks to Kenji Noguchi and Marat Khayrullin
@@ -96,7 +96,7 @@ Module reference
 
 Download
 --------
-poster can be downloaded from http://atlee.ca/software/poster/dist/0.3
+poster can be downloaded from http://atlee.ca/software/poster/dist/0.4
 
 Indices and tables
 ==================
