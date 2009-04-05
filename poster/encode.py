@@ -4,7 +4,18 @@ This module provides functions that faciliate encoding name/value pairs
 as multipart/form-data suitable for a HTTP POST or PUT request.
 
 multipart/form-data is the standard way to upload files over HTTP"""
-import uuid, urllib, re, os, mimetypes
+
+try:
+    import uuid
+    def gen_boundary():
+        return uuid.uuid4().hex
+except ImportError:
+    import random, sha
+    def gen_boundary():
+        bits = random.getrandbits(160)
+        return sha.new(str(bits)).hexdigest()
+
+import urllib, re, os, mimetypes
 
 def encode_and_quote(data):
     """If ``data`` is unicode, return urllib.quote_plus(data.encode("utf-8"))
@@ -278,7 +289,7 @@ def multipart_encode(params, boundary=None):
     parameters, and `headers` is a dictionary with the assoicated
     Content-Type and Content-Length headers."""
     if boundary is None:
-        boundary = uuid.uuid4().hex
+        boundary = gen_boundary()
     else:
         boundary = urllib.quote_plus(boundary)
 
