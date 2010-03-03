@@ -17,7 +17,7 @@ Example usage:
 >>> from StringIO import StringIO
 >>> import urllib2, poster.streaminghttp
 
->>> poster.streaminghttp.register_openers()
+>>> opener = poster.streaminghttp.register_openers()
 
 >>> s = "Test file data"
 >>> f = StringIO(s)
@@ -169,9 +169,15 @@ if hasattr(httplib, 'HTTPS'):
 
 def register_openers():
     """Register the streaming http handlers in the global urllib2 default
-    opener object."""
+    opener object.
+    
+    Returns the created OpenerDirector object."""
     handlers = [StreamingHTTPHandler, StreamingHTTPRedirectHandler]
     if hasattr(httplib, "HTTPS"):
         handlers.append(StreamingHTTPSHandler)
 
-    urllib2.install_opener(urllib2.build_opener(*handlers))
+    opener = urllib2.build_opener(*handlers)
+
+    urllib2.install_opener(opener)
+
+    return opener

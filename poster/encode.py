@@ -124,7 +124,7 @@ class MultipartParam(object):
         return cls(paramname, filename=os.path.basename(filename),
                 filetype=mimetypes.guess_type(filename)[0],
                 filesize=os.path.getsize(filename),
-                fileobj=open(filename, "r"))
+                fileobj=open(filename, "rb"))
 
     @classmethod
     def from_params(cls, params):
