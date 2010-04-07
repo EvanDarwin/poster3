@@ -78,7 +78,7 @@ class MultipartParam(object):
             self.filename = None
         else:
             if isinstance(filename, unicode):
-                # Encode with HTML entities
+                # Encode with XML entities
                 self.filename = filename.encode("ascii", "xmlcharrefreplace")
             else:
                 self.filename = str(filename)
