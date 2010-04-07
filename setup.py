@@ -1,7 +1,8 @@
 from setuptools import setup, find_packages
 from distutils.cmd import Command
+import poster
 
-version = '0.5'
+version = ".".join(str(x) for x in poster.version)
 
 class sphinx_command(Command):
     description = "rebuild sphinx docs"

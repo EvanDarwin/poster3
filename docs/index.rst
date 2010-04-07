@@ -86,6 +86,7 @@ Roadmap
 
 0.6 (TBD):
     - Fix for unicode filenames
+    - Update docs to clarify how to use multiple parameters with the same key
 
 0.9 (future):
     - Finalize API
