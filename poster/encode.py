@@ -241,16 +241,16 @@ def encode_file_header(boundary, paramname, filesize, filename=None,
 
     ``boundary`` is the boundary string used throughout a single request to
     separate variables.
-    
+
     ``paramname`` is the name of the variable in this request.
 
     ``filesize`` is the size of the file data.
 
     ``filename`` if specified is the filename to give to this field.  This
     field is only useful to the server for determining the original filename.
-    
+
     ``filetype`` if specified is the MIME type of this file.
-    
+
     The actual file data should be sent after this header has been sent.
     """
 
