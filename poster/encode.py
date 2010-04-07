@@ -275,10 +275,11 @@ def get_headers(params, boundary):
 def multipart_encode(params, boundary=None):
     """Encode ``params`` as multipart/form-data.
 
-    ``params`` should be a dictionary where the keys represent parameter names,
-    and the values are either parameter values, or file-like objects to
-    use as the parameter value.  The file-like objects must support .read()
-    and either .fileno() or both .seek() and .tell().
+    ``params`` should be a sequence of (name, value) pairs or MultipartParam
+    objects, or a mapping of names to values.
+    Values are either strings parameter values, or file-like objects to use as
+    the parameter value.  The file-like objects must support .read() and either
+    .fileno() or both .seek() and .tell().
 
     If ``boundary`` is set, then it as used as the MIME boundary.  Otherwise
     a randomly generated boundary will be used.  In either case, if the
@@ -288,7 +289,24 @@ def multipart_encode(params, boundary=None):
     Returns a tuple of `datagen`, `headers`, where `datagen` is a
     generator that will yield blocks of data that make up the encoded
     parameters, and `headers` is a dictionary with the assoicated
-    Content-Type and Content-Length headers."""
+    Content-Type and Content-Length headers.
+
+    Examples:
+
+    >>> datagen, headers = multipart_encode( [("key", "value1"), ("key", "value2")] )
+    >>> s = "".join(datagen)
+    >>> assert "value2" in s and "value1" in s
+
+    >>> p = MultipartParam("key", "value2")
+    >>> datagen, headers = multipart_encode( [("key", "value1"), p] )
+    >>> s = "".join(datagen)
+    >>> assert "value2" in s and "value1" in s
+
+    >>> datagen, headers = multipart_encode( {"key": "value1"} )
+    >>> s = "".join(datagen)
+    >>> assert "value2" not in s and "value1" in s
+
+    """
     if boundary is None:
         boundary = gen_boundary()
     else:

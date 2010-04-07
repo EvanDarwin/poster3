@@ -26,7 +26,7 @@ A short example may help::
     
     # headers contains the necessary Content-Type and Content-Length
     # datagen is a generator object that yields the encoded parameters
-    datagen, headers = multipart_encode({"image1": open("DSC0001.jpg")})
+    datagen, headers = multipart_encode({"image1": open("DSC0001.jpg", "rb")})
 
     # Create the Request object
     request = urllib2.Request("http://localhost:5000/upload_image", datagen, headers)
