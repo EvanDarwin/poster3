@@ -116,6 +116,17 @@ Content-Length: 42
                 poster.encode.encode_file_header("XXXXXXXXX", "foo", 42,
                     "test\"file.txt"))
 
+    def test_unicode_filename(self):
+        expected = unix2dos("""--XXXXXXXXX
+Content-Disposition: form-data; name="foo"; filename="&#9731;.txt"
+Content-Type: text/plain; charset=utf-8
+Content-Length: 42
+
+""")
+        self.assertEqual(expected,
+                poster.encode.encode_file_header("XXXXXXXXX", "foo", 42,
+                    u"\N{SNOWMAN}.txt"))
+
 class TestEncodeAndQuote(TestCase):
     def test(self):
         self.assertEqual("foo+bar", poster.encode.encode_and_quote("foo bar"))

@@ -33,6 +33,7 @@ class TestStreaming(TestCase):
                 start_response("301 MOVED", [("Location", "/foo")])
                 self.params = self.request.params
                 # Start up another thread to handle things
+                self.server_thread.join()
                 self.server_thread = threading.Thread(target = self.server.handle_request)
                 self.server_thread.start()
                 return ""
@@ -55,7 +56,7 @@ class TestStreaming(TestCase):
         if not self._opened:
             self._open("/foo")
         self.server.server_close()
-        #self.server_thread.join()
+        self.server_thread.join()
 
     def _open(self, url, params=None, headers=None):
         try:

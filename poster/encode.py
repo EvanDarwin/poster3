@@ -74,8 +74,14 @@ class MultipartParam(object):
                         filesize=None, fileobj=None):
         self.name = encode_and_quote(name)
         self.value = _strify(value)
-        self.filename = _strify(filename)
-        if self.filename:
+        if filename is None:
+            self.filename = None
+        else:
+            if isinstance(filename, unicode):
+                # Encode with HTML entities
+                self.filename = filename.encode("ascii", "xmlcharrefreplace")
+            else:
+                self.filename = str(filename)
             self.filename = self.filename.encode("string_escape").\
                     replace('"', '\\"')
         self.filetype = _strify(filetype)

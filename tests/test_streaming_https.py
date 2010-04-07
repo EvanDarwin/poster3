@@ -26,11 +26,19 @@ def app(environ, start_response):
     params = request.params
     return "OK"
 
-server = httpserver.serve(app, port=port, ssl_pem="*", start_loop=False)
-server_thread = threading.Thread(target=server.serve_forever)
-server_thread.start()
-
 class TestStreaming(TestCase):
+    def setUp(self):
+        self.server = httpserver.serve(app, port=port, ssl_pem="*", start_loop=False)
+        self.server_thread = threading.Thread(target = self.server.handle_request)
+        self.server_thread.start()
+        self._opened = True
+
+    def tearDown(self):
+        if not self._opened:
+            self._open("/foo")
+        self.server.server_close()
+        self.server_thread.join()
+
     def _open(self, url, params=None, headers=None):
         if headers is None:
             headers = {}
