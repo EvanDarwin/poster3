@@ -76,3 +76,9 @@ class TestStreaming(TestCase):
         self.assertEqual(params.get("file").file.read(),
                 open(__file__).read())
         self.assertEqual(params.get("foo"), "bar")
+
+    def test_stream_upload_generator_no_len(self):
+        def data():
+            yield ""
+
+        self.assertRaises(ValueError, self._open, "upload", data(), {})
