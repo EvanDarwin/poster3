@@ -79,6 +79,14 @@ Roadmap
     - Bug fixes from 0.3:
         - Fix connections to HTTPS.  Thanks to Kenji Noguchi and Marat Khayrullin
 
+0.5 (2009-10-07):
+    - Fix MultipartParam to open files in binary mode
+    - Update docs to open files in binary mode
+    - Updated register_openers() to return the OpenerDirector object
+
+0.6 (TBD):
+    - Fix for unicode filenames
+
 0.9 (future):
     - Finalize API
 
