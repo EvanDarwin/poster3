@@ -167,3 +167,30 @@ bar
                  'Content-Type': 'multipart/form-data; boundary=%s' % boundary})
         self.assertEqual("".join(datagen), expected)
 
+    def test_multiple_leys(self):
+        params = poster.encode.MultipartParam.from_params(
+                [("key", "value1"), ("key", "value2")])
+        boundary = "XYZXYZXYZ"
+        datagen, headers = poster.encode.multipart_encode(params, boundary)
+        encoded = "".join(datagen)
+
+        expected = unix2dos("""--XYZXYZXYZ
+Content-Disposition: form-data; name="key"
+Content-Type: text/plain; charset=utf-8
+Content-Length: 6
+
+value1
+--XYZXYZXYZ
+Content-Disposition: form-data; name="key"
+Content-Type: text/plain; charset=utf-8
+Content-Length: 6
+
+value2
+--XYZXYZXYZ--
+""")
+        self.assertEqual(encoded, expected)
+
+
+'--XYZXYZXYZ\r\nContent-Disposition: form-data; name="key"\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Length: 6\r\n\r\nvalue1\r\n--XYZXYZXYZ\r\nContent-Disposition: form-data; name="key"\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Length: 6\r\n\r\nvalue2\r\n--XYZXYZXYZ--\r\n'
+'--XYZXYZXYZ\r\nContent-Disposition: form-data; name="key"\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Length: 6\r\n\r\nvalue1\r\n--XYZXYZXYZ--\r\nContent-Disposition: form-data; name="key"\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Length: 6\r\n\r\nvalue2\r\n--XYZXYZXYZ--\r\n'
+

@@ -124,7 +124,7 @@ class MultipartParam(object):
     @classmethod
     def from_params(cls, params):
         """Returns a list of MultipartParam objects from a sequence of
-        name, value pairs, MultipartParam instances, 
+        name, value pairs, MultipartParam instances,
         or from a mapping of names to values
 
         The values may be strings or file objects."""
