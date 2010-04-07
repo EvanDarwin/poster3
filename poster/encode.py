@@ -33,6 +33,15 @@ def encode_and_quote(data):
         data = data.encode("utf-8")
     return urllib.quote_plus(data)
 
+def _strify(s):
+    """If s is a unicode string, encode it to UTF-8 and return the results,
+    otherwise return str(s), or None if s is None"""
+    if s is None:
+        return None
+    if isinstance(s, unicode):
+        return s.encode("utf-8")
+    return str(s)
+
 class MultipartParam(object):
     """Represents a single parameter in a multipart/form-data request
 
@@ -64,26 +73,13 @@ class MultipartParam(object):
     def __init__(self, name, value=None, filename=None, filetype=None,
                         filesize=None, fileobj=None):
         self.name = encode_and_quote(name)
-        if value is None:
-            self.value = None
-        else:
-            if isinstance(value, unicode):
-                self.value = value.encode("utf-8")
-            else:
-                self.value = str(value)
-        if filename is None:
-            self.filename = None
-        else:
-            if isinstance(filename, unicode):
-                filename = filename.encode("utf-8")
-            self.filename = filename.encode("string_escape").replace('"', '\\"')
+        self.value = _strify(value)
+        self.filename = _strify(filename)
+        if self.filename:
+            self.filename = self.filename.encode("string_escape").\
+                    replace('"', '\\"')
+        self.filetype = _strify(filetype)
 
-        if filetype is None:
-            self.filetype = None
-        elif isinstance(filetype, unicode):
-            self.filetype = filetype.encode("utf-8")
-        else:
-            self.filetype = str(filetype)
         self.filesize = filesize
         self.fileobj = fileobj
 

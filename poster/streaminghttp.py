@@ -153,8 +153,8 @@ class StreamingHTTPHandler(urllib2.HTTPHandler):
 if hasattr(httplib, 'HTTPS'):
     class StreamingHTTPSConnection(_StreamingHTTPMixin,
             httplib.HTTPSConnection):
-        """Subclass of `httplib.HTTSConnection` that overrides the `send()` method
-        to support iterable body objects"""
+        """Subclass of `httplib.HTTSConnection` that overrides the `send()`
+        method to support iterable body objects"""
 
     class StreamingHTTPSHandler(urllib2.HTTPSHandler):
         """Subclass of `urllib2.HTTPSHandler` that uses
