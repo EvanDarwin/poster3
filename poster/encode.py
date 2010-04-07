@@ -75,9 +75,8 @@ class MultipartParam(object):
             self.filename = None
         else:
             if isinstance(filename, unicode):
-                self.filename = filename.encode("utf-8").encode("string_escape").replace('"', '\\"')
-            else:
-                self.filename = filename.encode("string_escape").replace('"', '\\"')
+                filename = filename.encode("utf-8")
+            self.filename = filename.encode("string_escape").replace('"', '\\"')
 
         if filetype is None:
             self.filetype = None
@@ -103,10 +102,10 @@ class MultipartParam(object):
                 except:
                     raise ValueError("Could not determine filesize")
 
-    def __cmp__(self, o):
+    def __cmp__(self, other):
         attrs = ['name', 'value', 'filename', 'filetype', 'filesize', 'fileobj']
         myattrs = [getattr(self, a) for a in attrs]
-        oattrs = [getattr(o, a) for a in attrs]
+        oattrs = [getattr(other, a) for a in attrs]
         return cmp(myattrs, oattrs)
 
     @classmethod
