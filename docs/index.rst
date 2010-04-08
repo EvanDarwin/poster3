@@ -85,9 +85,10 @@ Roadmap
     - Updated register_openers() to return the OpenerDirector object
 
 0.6 (TBD):
-    - Fix for unicode filenames
     - Update docs to clarify how to use multiple parameters with the same key
-    - Added poster.version attribute
+    - Fix for unicode filenames.  Thanks to Zed A. Shaw
+    - Added poster.version attribute.  Thanks to Jp Calderone.
+    - Handle StringIO file objects.  Thanks to Christophe Combelles.
 
 0.9 (future):
     - Finalize API
