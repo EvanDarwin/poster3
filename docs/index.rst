@@ -87,6 +87,7 @@ Roadmap
 0.6 (TBD):
     - Fix for unicode filenames
     - Update docs to clarify how to use multiple parameters with the same key
+    - Added poster.version attribute
 
 0.9 (future):
     - Finalize API
@@ -105,7 +106,7 @@ Module reference
 
 Download
 --------
-poster can be downloaded from http://atlee.ca/software/poster/dist/0.4
+poster can be downloaded from http://atlee.ca/software/poster/dist/0.6
 
 Indices and tables
 ==================
