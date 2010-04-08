@@ -2,6 +2,7 @@
 from unittest import TestCase
 import mimetypes
 import poster.encode
+import StringIO
 
 def unix2dos(s):
     return s.replace("\n", "\r\n")
@@ -202,6 +203,19 @@ value2
         self.assertEqual(encoded, expected)
 
 
-'--XYZXYZXYZ\r\nContent-Disposition: form-data; name="key"\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Length: 6\r\n\r\nvalue1\r\n--XYZXYZXYZ\r\nContent-Disposition: form-data; name="key"\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Length: 6\r\n\r\nvalue2\r\n--XYZXYZXYZ--\r\n'
-'--XYZXYZXYZ\r\nContent-Disposition: form-data; name="key"\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Length: 6\r\n\r\nvalue1\r\n--XYZXYZXYZ--\r\nContent-Disposition: form-data; name="key"\r\nContent-Type: text/plain; charset=utf-8\r\nContent-Length: 6\r\n\r\nvalue2\r\n--XYZXYZXYZ--\r\n'
+    def test_stringio(self):
+        fp = StringIO.StringIO("file data")
+        params = poster.encode.MultipartParam.from_params( [("foo", fp)] )
+        boundary = "XYZXYZXYZ"
+        datagen, headers = poster.encode.multipart_encode(params, boundary)
+        encoded = "".join(datagen)
 
+        expected = unix2dos("""--XYZXYZXYZ
+Content-Disposition: form-data; name="foo"
+Content-Type: text/plain; charset=utf-8
+Content-Length: 9
+
+file data
+--XYZXYZXYZ--
+""")
+        self.assertEqual(encoded, expected)

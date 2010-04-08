@@ -145,7 +145,7 @@ class MultipartParam(object):
             name, value = item
             if hasattr(value, 'read'):
                 # Looks like a file object
-                filename = getattr(value, 'name')
+                filename = getattr(value, 'name', None)
                 if filename is not None:
                     filetype = mimetypes.guess_type(filename)[0]
                 else:
