@@ -60,6 +60,17 @@ the :class:`poster.encode.MultipartParam` class::
 
     datagen, headers = multipart_encode([image_param])
 
+You can also combine poster with other urllib2 handlers, e.g. for sending cookies::
+
+    opener = poster.streaminghttp.register_openers()
+    opener.add_handler(urllib2.HTTPCookieProcessor(cookielib.CookieJar()))
+
+    params = {'file': open("test.txt", "rb"), 'name': 'upload test'}
+    datagen, headers = poster.encode.multipart_encode(params)
+    request = urllib2.Request(upload_url, datagen, headers)
+    result = urllib2.urlopen(request)
+
+
 Roadmap
 -------
 
@@ -86,8 +97,8 @@ Roadmap
 
 0.6 (TBD):
     - Update docs to clarify how to use multiple parameters with the same key
-    - Fix for unicode filenames.  Thanks to Zed A. Shaw
-    - Added poster.version attribute.  Thanks to Jp Calderone.
+    - Fix for unicode filenames.
+    - Added poster.version attribute.  Thanks to JP Calderone.
     - Handle StringIO file objects.  Thanks to Christophe Combelles.
 
 0.9 (future):
