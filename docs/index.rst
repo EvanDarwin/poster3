@@ -118,7 +118,7 @@ Module reference
 
 Download
 --------
-poster can be downloaded from http://atlee.ca/software/poster/dist/0.6
+poster can be downloaded from http://atlee.ca/software/poster/dist/0.6.0
 
 
 License
