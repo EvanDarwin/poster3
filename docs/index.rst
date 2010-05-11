@@ -95,9 +95,9 @@ Roadmap
     - Update docs to open files in binary mode
     - Updated register_openers() to return the OpenerDirector object
 
-0.6 (TBD):
+0.6 (2010-05-10):
     - Update docs to clarify how to use multiple parameters with the same key
-    - Fix for unicode filenames.
+    - Fix for unicode filenames.  Thanks to Zed Shaw.
     - Added poster.version attribute.  Thanks to JP Calderone.
     - Handle StringIO file objects.  Thanks to Christophe Combelles.
 

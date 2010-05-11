@@ -9,4 +9,4 @@ New in version 0.6."""
 import poster.streaminghttp
 import poster.encode
 
-version = (0, 5, 1) # Thanks JP!
+version = (0, 6, 0) # Thanks JP!
