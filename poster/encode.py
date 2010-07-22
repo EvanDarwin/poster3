@@ -110,6 +110,12 @@ class MultipartParam(object):
         oattrs = [getattr(other, a) for a in attrs]
         return cmp(myattrs, oattrs)
 
+    def reset(self):
+        if self.fileobj is not None:
+            self.fileobj.seek(0)
+        elif self.value is None:
+            raise ValueError("Don't know how to reset this parameter")
+
     @classmethod
     def from_file(cls, paramname, filename):
         """Returns a new MultipartParam object constructed from the local
@@ -278,6 +284,43 @@ def get_headers(params, boundary):
     headers['Content-Length'] = get_body_size(params, boundary)
     return headers
 
+class multipart_yielder:
+    def __init__(self, params, boundary):
+        self.params = params
+        self.boundary = boundary
+        self.i = 0
+        self.param_iter = None
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        """generator function to yield multipart/form-data representation
+        of parameters"""
+        if self.param_iter is not None:
+            try:
+                block = self.param_iter.next()
+                return block
+            except StopIteration:
+                self.param_iter = None
+
+        if self.i is None:
+            raise StopIteration
+        elif self.i >= len(self.params):
+            self.param_iter = None
+            self.i = None
+            return "--%s--\r\n" % self.boundary
+
+        p = self.params[self.i]
+        self.param_iter = p.iter_encode(self.boundary)
+        self.i += 1
+        return self.next()
+
+    def reset(self):
+        self.i = 0
+        for param in self.params:
+            param.reset()
+
 def multipart_encode(params, boundary=None):
     """Encode ``params`` as multipart/form-data.
 
@@ -321,12 +364,4 @@ def multipart_encode(params, boundary=None):
     headers = get_headers(params, boundary)
     params = MultipartParam.from_params(params)
 
-    def yielder():
-        """generator function to yield multipart/form-data representation
-        of parameters"""
-        for param in params:
-            for block in param.iter_encode(boundary):
-                yield block
-        yield "--%s--\r\n" % boundary
-
-    return yielder(), headers
+    return multipart_yielder(params, boundary), headers

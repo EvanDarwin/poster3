@@ -9,12 +9,11 @@ import threading, time
 import sys
 import os
 
-poster.streaminghttp.register_openers()
-
 port = 5123
 
 class TestStreaming(TestCase):
     def setUp(self):
+        self.opener = poster.streaminghttp.register_openers()
         # Disable HTTPS support for these tests to excercise the non-https code
         # HTTPS is tested in test_streaming_https.py
         if hasattr(httplib, "HTTPS"):
@@ -37,6 +36,21 @@ class TestStreaming(TestCase):
                 self.server_thread = threading.Thread(target = self.server.handle_request)
                 self.server_thread.start()
                 return ""
+            elif self.request.path == '/needs_auth':
+                auth = self.request.headers.get('Authorization')
+                if auth and auth.startswith("Basic"):
+                    user,passwd = auth.split()[-1].decode("base64").split(":")
+                else:
+                    user = None
+
+                if user != 'john':
+                    start_response("401 Unauthorized", [('WWW-Authenticate', "Basic realm=\"default\"")])
+                    self.params = self.request.params
+                    # Start up another thread to handle things
+                    self.server_thread.join()
+                    self.server_thread = threading.Thread(target = self.server.handle_request)
+                    self.server_thread.start()
+                    return ""
 
             start_response("200 OK", [("Content-Type", "text/plain")])
             # We need to look at the request's parameters to force webob
@@ -130,3 +144,20 @@ class TestStreaming(TestCase):
 
         self.assertEqual(response.read(), "OK")
         self.assertEqual(self.request.path, "/foo")
+
+    def test_login(self):
+        password_manager = urllib2.HTTPPasswordMgrWithDefaultRealm()
+        password_manager.add_password(
+                None, "http://localhost:%i/needs_auth" % port, 'john', 'secret'
+        )
+
+        auth_handler = urllib2.HTTPBasicAuthHandler(password_manager)
+        auth_handler.handler_order = 0
+
+        self.opener.add_handler(auth_handler)
+
+        data = open("poster/__init__.py")
+        headers = {"Content-Length": os.path.getsize("poster/__init__.py")}
+
+        response = self._open("needs_auth", data, headers)
+        self.assertEqual(response.read(), "OK")

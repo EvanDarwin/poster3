@@ -62,6 +62,8 @@ class _StreamingHTTPMixin:
         try:
             blocksize = 8192
             if hasattr(value, 'read') :
+                if hasattr(value, 'seek'):
+                    value.seek(0)
                 if self.debuglevel > 0:
                     print "sendIng a read()able"
                 data = value.read(blocksize)
@@ -69,6 +71,8 @@ class _StreamingHTTPMixin:
                     self.sock.sendall(data)
                     data = value.read(blocksize)
             elif hasattr(value, 'next'):
+                if hasattr(value, 'reset'):
+                    value.reset()
                 if self.debuglevel > 0:
                     print "sendIng an iterable"
                 for data in value:

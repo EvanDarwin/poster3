@@ -179,7 +179,7 @@ bar
                  'Content-Type': 'multipart/form-data; boundary=%s' % boundary})
         self.assertEqual("".join(datagen), expected)
 
-    def test_multiple_leys(self):
+    def test_multiple_keys(self):
         params = poster.encode.MultipartParam.from_params(
                 [("key", "value1"), ("key", "value2")])
         boundary = "XYZXYZXYZ"
@@ -218,4 +218,69 @@ Content-Length: 9
 file data
 --XYZXYZXYZ--
 """)
+        self.assertEqual(encoded, expected)
+
+    def test_reset_string(self):
+        p = poster.encode.MultipartParam("foo", "bar")
+        boundary = "XYZXYZXYZ"
+
+        datagen, headers = poster.encode.multipart_encode([p], boundary)
+
+        expected = unix2dos("""--XYZXYZXYZ
+Content-Disposition: form-data; name="foo"
+Content-Type: text/plain; charset=utf-8
+Content-Length: 3
+
+bar
+--XYZXYZXYZ--
+""")
+
+        self.assertEquals("".join(datagen), expected)
+        datagen.reset()
+        self.assertEquals("".join(datagen), expected)
+
+    def test_reset_multiple_keys(self):
+        params = poster.encode.MultipartParam.from_params(
+                [("key", "value1"), ("key", "value2")])
+        boundary = "XYZXYZXYZ"
+        datagen, headers = poster.encode.multipart_encode(params, boundary)
+        expected = unix2dos("""--XYZXYZXYZ
+Content-Disposition: form-data; name="key"
+Content-Type: text/plain; charset=utf-8
+Content-Length: 6
+
+value1
+--XYZXYZXYZ
+Content-Disposition: form-data; name="key"
+Content-Type: text/plain; charset=utf-8
+Content-Length: 6
+
+value2
+--XYZXYZXYZ--
+""")
+
+        encoded = "".join(datagen)
+        self.assertEqual(encoded, expected)
+        datagen.reset()
+        encoded = "".join(datagen)
+        self.assertEqual(encoded, expected)
+
+    def test_reset_file(self):
+        fp = StringIO.StringIO("file data")
+        params = poster.encode.MultipartParam.from_params( [("foo", fp)] )
+        boundary = "XYZXYZXYZ"
+        datagen, headers = poster.encode.multipart_encode(params, boundary)
+
+        expected = unix2dos("""--XYZXYZXYZ
+Content-Disposition: form-data; name="foo"
+Content-Type: text/plain; charset=utf-8
+Content-Length: 9
+
+file data
+--XYZXYZXYZ--
+""")
+        encoded = "".join(datagen)
+        self.assertEqual(encoded, expected)
+        datagen.reset()
+        encoded = "".join(datagen)
         self.assertEqual(encoded, expected)
