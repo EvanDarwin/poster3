@@ -174,7 +174,7 @@ if hasattr(httplib, 'HTTPS'):
             # body, that we've also specified Content-Length
             if req.has_data():
                 data = req.get_data()
-                if not hasattr(data, 'read') and hasattr(data, 'next'):
+                if hasattr(data, 'read') or hasattr(data, 'next'):
                     if not req.has_header('Content-length'):
                         raise ValueError(
                                 "No Content-Length specified for iterable body")

@@ -69,9 +69,13 @@ class MultipartParam(object):
     file descriptor, and if that fails, by seeking to the end of the file,
     recording the current position as the size, and then by seeking back to the
     beginning of the file.
+
+    ``cb`` is a callable which will be called from iter_encode with (self,
+    current, total), representing the current parameter, current amount
+    transferred, and the total size.
     """
     def __init__(self, name, value=None, filename=None, filetype=None,
-                        filesize=None, fileobj=None):
+                        filesize=None, fileobj=None, cb=None):
         self.name = encode_and_quote(name)
         self.value = _strify(value)
         if filename is None:
@@ -88,6 +92,7 @@ class MultipartParam(object):
 
         self.filesize = filesize
         self.fileobj = fileobj
+        self.cb = cb
 
         if self.value is not None and self.fileobj is not None:
             raise ValueError("Only one of value or fileobj may be specified")
@@ -139,7 +144,11 @@ class MultipartParam(object):
         name, value pairs, MultipartParam instances,
         or from a mapping of names to values
 
-        The values may be strings or file objects."""
+        The values may be strings or file objects, or MultipartParam objects.
+        MultipartParam object names must match the given names in the
+        name,value pairs or mapping, if applicable.
+
+        If """
         if hasattr(params, 'items'):
             params = params.items()
 
@@ -149,6 +158,10 @@ class MultipartParam(object):
                 retval.append(item)
                 continue
             name, value = item
+            if isinstance(value, cls):
+                assert value.name == name
+                retval.append(value)
+                continue
             if hasattr(value, 'read'):
                 # Looks like a file object
                 filename = getattr(value, 'name', None)
@@ -210,10 +223,20 @@ class MultipartParam(object):
         """Yields the encoding of this parameter
         If self.fileobj is set, then blocks of ``blocksize`` bytes are read and
         yielded."""
+        total = self.get_size(boundary)
+        current = 0
         if self.value is not None:
-            yield self.encode(boundary)
+            block = self.encode(boundary)
+            current += len(block)
+            yield block
+            if self.cb:
+                self.cb(self, current, total)
         else:
-            yield self.encode_hdr(boundary)
+            block = self.encode_hdr(boundary)
+            current += len(block)
+            yield block
+            if self.cb:
+                self.cb(self, current, total)
             last_block = ""
             encoded_boundary = "--%s" % encode_and_quote(boundary)
             boundary_exp = re.compile("^%s$" % re.escape(encoded_boundary),
@@ -221,13 +244,19 @@ class MultipartParam(object):
             while True:
                 block = self.fileobj.read(blocksize)
                 if not block:
+                    current += 2
                     yield "\r\n"
+                    if self.cb:
+                        self.cb(self, current, total)
                     break
                 last_block += block
                 if boundary_exp.search(last_block):
                     raise ValueError("boundary found in file data")
                 last_block = last_block[-len(encoded_boundary)-2:]
+                current += len(block)
                 yield block
+                if self.cb:
+                    self.cb(self, current, total)
 
     def get_size(self, boundary):
         """Returns the size in bytes that this param will be when encoded
@@ -285,11 +314,16 @@ def get_headers(params, boundary):
     return headers
 
 class multipart_yielder:
-    def __init__(self, params, boundary):
+    def __init__(self, params, boundary, cb):
         self.params = params
         self.boundary = boundary
+        self.cb = cb
+
         self.i = 0
+        self.p = None
         self.param_iter = None
+        self.current = 0
+        self.total = get_body_size(params, boundary)
 
     def __iter__(self):
         return self
@@ -300,28 +334,38 @@ class multipart_yielder:
         if self.param_iter is not None:
             try:
                 block = self.param_iter.next()
+                self.current += len(block)
+                if self.cb:
+                    self.cb(self.p, self.current, self.total)
                 return block
             except StopIteration:
+                self.p = None
                 self.param_iter = None
 
         if self.i is None:
             raise StopIteration
         elif self.i >= len(self.params):
             self.param_iter = None
+            self.p = None
             self.i = None
-            return "--%s--\r\n" % self.boundary
+            block = "--%s--\r\n" % self.boundary
+            self.current += len(block)
+            if self.cb:
+                self.cb(self.p, self.current, self.total)
+            return block
 
-        p = self.params[self.i]
-        self.param_iter = p.iter_encode(self.boundary)
+        self.p = self.params[self.i]
+        self.param_iter = self.p.iter_encode(self.boundary)
         self.i += 1
         return self.next()
 
     def reset(self):
         self.i = 0
+        self.current = 0
         for param in self.params:
             param.reset()
 
-def multipart_encode(params, boundary=None):
+def multipart_encode(params, boundary=None, cb=None):
     """Encode ``params`` as multipart/form-data.
 
     ``params`` should be a sequence of (name, value) pairs or MultipartParam
@@ -334,6 +378,11 @@ def multipart_encode(params, boundary=None):
     a randomly generated boundary will be used.  In either case, if the
     boundary string appears in the parameter values a ValueError will be
     raised.
+
+    If ``cb`` is set, it should be a callback which will get called as blocks
+    of data are encoded.  It will be called with (param, current, total),
+    indicating the current parameter being encoded, the current amount encoded,
+    and the total amount to encode.
 
     Returns a tuple of `datagen`, `headers`, where `datagen` is a
     generator that will yield blocks of data that make up the encoded
@@ -364,4 +413,4 @@ def multipart_encode(params, boundary=None):
     headers = get_headers(params, boundary)
     params = MultipartParam.from_params(params)
 
-    return multipart_yielder(params, boundary), headers
+    return multipart_yielder(params, boundary, cb), headers

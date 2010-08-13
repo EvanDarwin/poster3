@@ -101,6 +101,11 @@ Roadmap
     - Added poster.version attribute.  Thanks to JP Calderone.
     - Handle StringIO file objects.  Thanks to Christophe Combelles.
 
+0.7 (TBD):
+    - Added callback parameters to MutipartParam and multipart_encode so you
+      can add progress indicators to your applications
+    - Fixed a bug where posting to a url that returned a 401 code would hang
+
 0.9 (future):
     - Finalize API
 

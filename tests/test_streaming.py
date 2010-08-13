@@ -2,75 +2,52 @@
 from unittest import TestCase
 import httplib
 import poster
-import webob
-from paste import httpserver
 import urllib2, urllib
-import threading, time
+import threading, time, signal
 import sys
 import os
+import subprocess
 
 port = 5123
 
 class TestStreaming(TestCase):
+    disable_https = True
     def setUp(self):
         self.opener = poster.streaminghttp.register_openers()
-        # Disable HTTPS support for these tests to excercise the non-https code
-        # HTTPS is tested in test_streaming_https.py
-        if hasattr(httplib, "HTTPS"):
-            self.https = getattr(httplib, "HTTPS")
-            delattr(httplib, "HTTPS")
-            reload(poster.streaminghttp)
+        if self.disable_https:
+            # Disable HTTPS support for these tests to excercise the non-https code
+            # HTTPS is tested in test_streaming_https.py
+            if hasattr(httplib, "HTTPS"):
+                self.https = getattr(httplib, "HTTPS")
+                delattr(httplib, "HTTPS")
+                reload(poster.streaminghttp)
+            else:
+                self.https = None
         else:
             self.https = None
 
-        self.request = None
-        self._opened = True
-
-        def app(environ, start_response):
-            self.request = webob.Request(environ)
-            if self.request.path == '/redirect':
-                start_response("301 MOVED", [("Location", "/foo")])
-                self.params = self.request.params
-                # Start up another thread to handle things
-                self.server_thread.join()
-                self.server_thread = threading.Thread(target = self.server.handle_request)
-                self.server_thread.start()
-                return ""
-            elif self.request.path == '/needs_auth':
-                auth = self.request.headers.get('Authorization')
-                if auth and auth.startswith("Basic"):
-                    user,passwd = auth.split()[-1].decode("base64").split(":")
+        cmd = [sys.executable, os.path.join(os.path.dirname(__file__), 'test_server.py'), str(port)]
+        if not self.disable_https:
+            cmd.append("ssl")
+        null = open(os.devnull, "w")
+        self.server_proc = subprocess.Popen(cmd, stdout=null, stderr=null, close_fds=True)
+        # Wait until we can connect to it
+        while True:
+            try:
+                if self.disable_https:
+                    urllib2.urlopen("http://localhost:%i/" % port).read()
                 else:
-                    user = None
-
-                if user != 'john':
-                    start_response("401 Unauthorized", [('WWW-Authenticate', "Basic realm=\"default\"")])
-                    self.params = self.request.params
-                    # Start up another thread to handle things
-                    self.server_thread.join()
-                    self.server_thread = threading.Thread(target = self.server.handle_request)
-                    self.server_thread.start()
-                    return ""
-
-            start_response("200 OK", [("Content-Type", "text/plain")])
-            # We need to look at the request's parameters to force webob
-            # to consume the POST body
-            # The cat is alive
-            self.params = self.request.params
-            return "OK"
-
-        self.server = httpserver.WSGIServer(app, ("localhost", port), httpserver.WSGIHandler)
-
-        self.server_thread = threading.Thread(target = self.server.handle_request)
-        self.server_thread.start()
+                    urllib2.urlopen("https://localhost:%i/" % port).read()
+                break
+            except:
+                time.sleep(0.1)
 
     def tearDown(self):
         if self.https:
             setattr(httplib, "HTTPS", self.https)
-        if not self._opened:
-            self._open("/foo")
-        self.server.server_close()
-        self.server_thread.join()
+
+        os.kill(self.server_proc.pid, signal.SIGINT)
+        self.server_proc.wait()
 
     def _open(self, url, params=None, headers=None):
         try:
@@ -78,7 +55,7 @@ class TestStreaming(TestCase):
                 headers = {}
             req = urllib2.Request("http://localhost:%i/%s" % (port, url), params,
                     headers)
-            return urllib2.urlopen(req)
+            return urllib2.urlopen(req).read()
         except:
             self._opened = False
             raise
@@ -86,15 +63,12 @@ class TestStreaming(TestCase):
     def test_basic(self):
         response = self._open("testing123")
 
-        self.assertEqual(response.read(), "OK")
-        self.assertEqual(self.request.path, "/testing123")
+        self.assertEqual(response, "Path: /testing123")
 
     def test_basic2(self):
         response = self._open("testing?foo=bar")
 
-        self.assertEqual(response.read(), "OK")
-        self.assertEqual(self.request.path, "/testing")
-        self.assertEqual(self.params.get("foo"), "bar")
+        self.assertEqual(response, "Path: /testing\nfoo: bar")
 
     def test_nonstream_uploadfile(self):
         datagen, headers = poster.encode.multipart_encode([
@@ -104,9 +78,7 @@ class TestStreaming(TestCase):
         data = "".join(datagen)
 
         response = self._open("upload", data, headers)
-        self.assertEqual(self.params.get("file").file.read(),
-                open(__file__).read())
-        self.assertEqual(self.params.get("foo"), "bar")
+        self.assertEqual(response, "Path: /upload\nfile: %s\nfoo: bar" % open(__file__).read())
 
     def test_stream_upload_generator(self):
         datagen, headers = poster.encode.multipart_encode([
@@ -114,20 +86,14 @@ class TestStreaming(TestCase):
             poster.encode.MultipartParam("foo", "bar")])
 
         response = self._open("upload", datagen, headers)
-        self.assertEqual(self.params.get("file").file.read(),
-                open(__file__).read())
-        self.assertEqual(self.params.get("foo"), "bar")
+        self.assertEqual(response, "Path: /upload\nfile: %s\nfoo: bar" % open(__file__).read())
 
     def test_stream_upload_file(self):
         data = open("poster/__init__.py")
         headers = {"Content-Length": os.path.getsize("poster/__init__.py")}
 
         response = self._open("upload", data, headers)
-
-        request_body = self.request.body_file.read()
-        request_body = urllib.unquote_plus(request_body)
-        data = open("poster/__init__.py").read()
-        self.assertEquals(request_body, data)
+        self.assertEquals(response, "Path: /upload\n%s" % open("poster/__init__.py").read().replace(" = ", " :  "))
 
     def test_stream_upload_file_no_len(self):
         data = open(__file__)
@@ -142,8 +108,7 @@ class TestStreaming(TestCase):
     def test_redirect(self):
         response = self._open("redirect")
 
-        self.assertEqual(response.read(), "OK")
-        self.assertEqual(self.request.path, "/foo")
+        self.assertEqual(response, "Path: /foo")
 
     def test_login(self):
         password_manager = urllib2.HTTPPasswordMgrWithDefaultRealm()
@@ -160,4 +125,17 @@ class TestStreaming(TestCase):
         headers = {"Content-Length": os.path.getsize("poster/__init__.py")}
 
         response = self._open("needs_auth", data, headers)
-        self.assertEqual(response.read(), "OK")
+        self.assertEqual(response, "Path: /needs_auth\n%s" % open("poster/__init__.py").read().replace(" = ", " :  "))
+
+class TestStreamingHTTPS(TestStreaming):
+    disable_https = False
+    def _open(self, url, params=None, headers=None):
+        try:
+            if headers is None:
+                headers = {}
+            req = urllib2.Request("https://localhost:%i/%s" % (port, url), params,
+                    headers)
+            return urllib2.urlopen(req).read()
+        except:
+            self._opened = False
+            raise

@@ -3,6 +3,7 @@ from unittest import TestCase
 import mimetypes
 import poster.encode
 import StringIO
+import sys
 
 def unix2dos(s):
     return s.replace("\n", "\r\n")
@@ -155,6 +156,26 @@ class TestMultiparam(TestCase):
         self.assertEqual(poster.encode.MultipartParam.from_params(
             [expected[0], expected[1]]), expected)
 
+    def test_from_params_dict(self):
+
+        p = poster.encode.MultipartParam('file', fileobj=open("tests/test_encode.py"))
+        params = {"foo": "bar", "file": p}
+
+        expected = [poster.encode.MultipartParam("foo", "bar"), p]
+        retval = poster.encode.MultipartParam.from_params(params)
+
+        expected.sort()
+        retval.sort()
+
+        self.assertEqual(retval, expected)
+
+    def test_from_params_assertion(self):
+        p = poster.encode.MultipartParam('file', fileobj=open("tests/test_encode.py"))
+        params = {"foo": "bar", "baz": p}
+
+        self.assertRaises(AssertionError, poster.encode.MultipartParam.from_params,
+                params)
+
     def test_simple(self):
         p = poster.encode.MultipartParam("foo", "bar")
         boundary = "XYZXYZXYZ"
@@ -284,3 +305,67 @@ file data
         datagen.reset()
         encoded = "".join(datagen)
         self.assertEqual(encoded, expected)
+
+    def test_MultipartParam_cb(self):
+        log = []
+        def cb(p, current, total):
+            log.append( (p, current, total) )
+        p = poster.encode.MultipartParam("foo", "bar", cb=cb)
+        boundary = "XYZXYZXYZ"
+
+        datagen, headers = poster.encode.multipart_encode([p], boundary)
+
+        "".join(datagen)
+
+        l = p.get_size(boundary)
+        self.assertEquals(log[-1], (p, l, l))
+
+    def test_MultipartParam_file_cb(self):
+        log = []
+        def cb(p, current, total):
+            log.append( (p, current, total) )
+        p = poster.encode.MultipartParam("foo", fileobj=open("tests/test_encode.py"),
+                cb=cb)
+        boundary = poster.encode.gen_boundary()
+
+        list(p.iter_encode(boundary))
+
+        l = p.get_size(boundary)
+        self.assertEquals(log[-1], (p, l, l))
+
+    def test_multipart_encode_cb(self):
+        log = []
+        def cb(p, current, total):
+            log.append( (p, current, total) )
+        p = poster.encode.MultipartParam("foo", "bar")
+        boundary = "XYZXYZXYZ"
+
+        datagen, headers = poster.encode.multipart_encode([p], boundary, cb=cb)
+
+        "".join(datagen)
+
+        l = headers['Content-Length']
+        self.assertEquals(log[-1], (None, l, l))
+
+class TestGenBoundary(TestCase):
+    def testGenBoundary(self):
+        boundary1 = poster.encode.gen_boundary()
+        boundary2 = poster.encode.gen_boundary()
+
+        self.assertNotEqual(boundary1, boundary2)
+        self.assert_(len(boundary1) > 0)
+
+class TestBackupGenBoundary(TestGenBoundary):
+    _orig_import = __import__
+    def setUp(self):
+        # Make import uuid fail
+        def my_import(name, *args, **kwargs):
+            if name == 'uuid':
+                raise ImportError("Disabled for testing")
+            return self._orig_import(name, *args, **kwargs)
+        __builtins__['__import__'] = my_import
+        reload(poster.encode)
+
+    def tearDown(self):
+        __builtins__['__import__'] = self._orig_import
+        reload(poster.encode)
