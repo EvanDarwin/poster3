@@ -103,8 +103,14 @@ Roadmap
 
 0.7 (TBD):
     - Added callback parameters to MutipartParam and multipart_encode so you
-      can add progress indicators to your applications
-    - Fixed a bug where posting to a url that returned a 401 code would hang
+      can add progress indicators to your applications.  Thanks to Ludvig
+      Ericson for the suggestion.
+    - Fixed a bug where posting to a url that returned a 401 code would hang.
+      Thanks to Patrick Guido and Andreas Loupasakis for the bug reports.
+    - MultipartParam.from_params will now accept MultipartParam instances as
+      the values of a dict object passed in.  The parameter name must match the
+      key corresponding to the parameter in the dict.  Thanks to Matthew King
+      for the suggestion.
 
 0.9 (future):
     - Finalize API
