@@ -192,11 +192,11 @@ bar
         self.assertEqual(poster.encode.get_body_size([p], boundary),
                 len(expected))
         self.assertEqual(poster.encode.get_headers([p], boundary),
-                {'Content-Length': len(expected),
+                {'Content-Length': str(len(expected)),
                  'Content-Type': 'multipart/form-data; boundary=%s' % boundary})
 
         datagen, headers = poster.encode.multipart_encode([p], boundary)
-        self.assertEqual(headers, {'Content-Length': len(expected),
+        self.assertEqual(headers, {'Content-Length': str(len(expected)),
                  'Content-Type': 'multipart/form-data; boundary=%s' % boundary})
         self.assertEqual("".join(datagen), expected)
 
@@ -344,7 +344,7 @@ file data
 
         "".join(datagen)
 
-        l = headers['Content-Length']
+        l = int(headers['Content-Length'])
         self.assertEquals(log[-1], (None, l, l))
 
 class TestGenBoundary(TestCase):

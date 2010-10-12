@@ -40,6 +40,8 @@ class TestStreaming(TestCase):
                     urllib2.urlopen("https://localhost:%i/" % port).read()
                 break
             except:
+                #import traceback
+                #traceback.print_exc()
                 time.sleep(0.1)
 
     def tearDown(self):
@@ -90,7 +92,7 @@ class TestStreaming(TestCase):
 
     def test_stream_upload_file(self):
         data = open("poster/__init__.py")
-        headers = {"Content-Length": os.path.getsize("poster/__init__.py")}
+        headers = {"Content-Length": str(os.path.getsize("poster/__init__.py"))}
 
         response = self._open("upload", data, headers)
         self.assertEquals(response, "Path: /upload\n%s" % open("poster/__init__.py").read().replace(" = ", " :  "))
@@ -122,7 +124,7 @@ class TestStreaming(TestCase):
         self.opener.add_handler(auth_handler)
 
         data = open("poster/__init__.py")
-        headers = {"Content-Length": os.path.getsize("poster/__init__.py")}
+        headers = {"Content-Length": str(os.path.getsize("poster/__init__.py"))}
 
         response = self._open("needs_auth", data, headers)
         self.assertEqual(response, "Path: /needs_auth\n%s" % open("poster/__init__.py").read().replace(" = ", " :  "))

@@ -310,7 +310,7 @@ def get_headers(params, boundary):
     headers = {}
     boundary = urllib.quote_plus(boundary)
     headers['Content-Type'] = "multipart/form-data; boundary=%s" % boundary
-    headers['Content-Length'] = get_body_size(params, boundary)
+    headers['Content-Length'] = str(get_body_size(params, boundary))
     return headers
 
 class multipart_yielder:
