@@ -101,7 +101,7 @@ Roadmap
     - Added poster.version attribute.  Thanks to JP Calderone.
     - Handle StringIO file objects.  Thanks to Christophe Combelles.
 
-0.7 (TBD):
+0.7 (2010-10-23):
     - Added callback parameters to MutipartParam and multipart_encode so you
       can add progress indicators to your applications.  Thanks to Ludvig
       Ericson for the suggestion.
@@ -130,7 +130,7 @@ Module reference
 
 Download
 --------
-poster can be downloaded from http://atlee.ca/software/poster/dist/0.6.0
+poster can be downloaded from http://atlee.ca/software/poster/dist/0.7.0
 
 
 License
