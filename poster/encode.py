@@ -146,9 +146,7 @@ class MultipartParam(object):
 
         The values may be strings or file objects, or MultipartParam objects.
         MultipartParam object names must match the given names in the
-        name,value pairs or mapping, if applicable.
-
-        If """
+        name,value pairs or mapping, if applicable."""
         if hasattr(params, 'items'):
             params = params.items()
 

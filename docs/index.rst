@@ -111,6 +111,7 @@ Roadmap
       the values of a dict object passed in.  The parameter name must match the
       key corresponding to the parameter in the dict.  Thanks to Matthew King
       for the suggestion.
+    - poster now works under python2.7
 
 0.9 (future):
     - Finalize API
