@@ -7,6 +7,7 @@ import threading, time, signal
 import sys
 import os
 import subprocess
+import tempfile
 
 port = 5123
 
@@ -26,23 +27,36 @@ class TestStreaming(TestCase):
         else:
             self.https = None
 
-        cmd = [sys.executable, os.path.join(os.path.dirname(__file__), 'test_server.py'), str(port)]
+        # Hard code to python2.6 for now, since python2.7 can't run the test server reliably
+        cmd = ["python2.6", os.path.join(os.path.dirname(__file__), 'test_server.py'), str(port)]
         if not self.disable_https:
             cmd.append("ssl")
         null = open(os.devnull, "w")
-        self.server_proc = subprocess.Popen(cmd, stdout=null, stderr=null, close_fds=True)
-        # Wait until we can connect to it
-        while True:
-            try:
-                if self.disable_https:
-                    urllib2.urlopen("http://localhost:%i/" % port).read()
-                else:
-                    urllib2.urlopen("https://localhost:%i/" % port).read()
-                break
-            except:
-                #import traceback
-                #traceback.print_exc()
-                time.sleep(0.1)
+        self.server_output = tempfile.TemporaryFile()
+        self.server_proc = None
+        try:
+            self.server_proc = subprocess.Popen(cmd, stdout=self.server_output, stderr=self.server_output, close_fds=True)
+            for i in range(20):
+                try:
+                    if self.disable_https:
+                        urllib2.urlopen("http://localhost:%i/" % port).read()
+                    else:
+                        urllib2.urlopen("https://localhost:%i/" % port).read()
+                    time.sleep(0.1)
+                    break
+                except:
+                    #import traceback
+                    #traceback.print_exc()
+                    time.sleep(0.1)
+            else:
+                self.server_output.seek(0)
+                print self.server_output.read()
+                raise OSError("Error starting server")
+        except:
+            if self.server_proc:
+                os.kill(self.server_proc.pid, signal.SIGINT)
+                self.server_proc.wait()
+            raise
 
     def tearDown(self):
         if self.https:
@@ -50,6 +64,8 @@ class TestStreaming(TestCase):
 
         os.kill(self.server_proc.pid, signal.SIGINT)
         self.server_proc.wait()
+        self.server_output.seek(0)
+        print self.server_output.read()
 
     def _open(self, url, params=None, headers=None):
         try:
