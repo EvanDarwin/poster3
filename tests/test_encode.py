@@ -13,7 +13,6 @@ class TestEncode_String(TestCase):
         expected = unix2dos("""--XXXXXXXXX
 Content-Disposition: form-data; name="foo"
 Content-Type: text/plain; charset=utf-8
-Content-Length: 3
 
 bar
 """)
@@ -24,7 +23,6 @@ bar
         expected = unix2dos("""--XXXXXXXXX
 Content-Disposition: form-data; name="foo+baz"
 Content-Type: text/plain; charset=utf-8
-Content-Length: 3
 
 bar
 """)
@@ -35,7 +33,6 @@ bar
         expected = unix2dos("""--XXXXXXXXX
 Content-Disposition: form-data; name="foo"
 Content-Type: text/plain; charset=utf-8
-Content-Length: 11
 
 bar baz@bat
 """)
@@ -46,7 +43,6 @@ bar baz@bat
         expected = unix2dos("""--ABC+DEF
 Content-Disposition: form-data; name="foo"
 Content-Type: text/plain; charset=utf-8
-Content-Length: 3
 
 bar
 """)
@@ -57,7 +53,6 @@ bar
         expected = unix2dos("""--XXXXXXXXX
 Content-Disposition: form-data; name="foo"
 Content-Type: text/plain; charset=utf-8
-Content-Length: 4
 
 b\xc3\xa1r
 """)
@@ -70,7 +65,6 @@ class TestEncode_File(TestCase):
         expected = unix2dos("""--XXXXXXXXX
 Content-Disposition: form-data; name="foo"
 Content-Type: text/plain; charset=utf-8
-Content-Length: 42
 
 """)
         self.assertEqual(expected,
@@ -80,7 +74,6 @@ Content-Length: 42
         expected = unix2dos("""--XXXXXXXXX
 Content-Disposition: form-data; name="foo"
 Content-Type: text/html
-Content-Length: 42
 
 """)
         self.assertEqual(expected,
@@ -90,7 +83,6 @@ Content-Length: 42
         expected = unix2dos("""--XXXXXXXXX
 Content-Disposition: form-data; name="foo"; filename="test.txt"
 Content-Type: text/plain; charset=utf-8
-Content-Length: 42
 
 """)
         self.assertEqual(expected,
@@ -101,7 +93,6 @@ Content-Length: 42
         expected = unix2dos("""--XXXXXXXXX
 Content-Disposition: form-data; name="foo"; filename="test file.txt"
 Content-Type: text/plain; charset=utf-8
-Content-Length: 42
 
 """)
         self.assertEqual(expected,
@@ -111,7 +102,6 @@ Content-Length: 42
         expected = unix2dos("""--XXXXXXXXX
 Content-Disposition: form-data; name="foo"; filename="test\\"file.txt"
 Content-Type: text/plain; charset=utf-8
-Content-Length: 42
 
 """)
         self.assertEqual(expected,
@@ -122,7 +112,6 @@ Content-Length: 42
         expected = unix2dos("""--XXXXXXXXX
 Content-Disposition: form-data; name="foo"; filename="&#9731;.txt"
 Content-Type: text/plain; charset=utf-8
-Content-Length: 42
 
 """)
         self.assertEqual(expected,
@@ -182,7 +171,6 @@ class TestMultiparam(TestCase):
         expected = unix2dos("""--XYZXYZXYZ
 Content-Disposition: form-data; name="foo"
 Content-Type: text/plain; charset=utf-8
-Content-Length: 3
 
 bar
 --XYZXYZXYZ--
@@ -210,13 +198,11 @@ bar
         expected = unix2dos("""--XYZXYZXYZ
 Content-Disposition: form-data; name="key"
 Content-Type: text/plain; charset=utf-8
-Content-Length: 6
 
 value1
 --XYZXYZXYZ
 Content-Disposition: form-data; name="key"
 Content-Type: text/plain; charset=utf-8
-Content-Length: 6
 
 value2
 --XYZXYZXYZ--
@@ -234,7 +220,6 @@ value2
         expected = unix2dos("""--XYZXYZXYZ
 Content-Disposition: form-data; name="foo"
 Content-Type: text/plain; charset=utf-8
-Content-Length: 9
 
 file data
 --XYZXYZXYZ--
@@ -250,7 +235,6 @@ file data
         expected = unix2dos("""--XYZXYZXYZ
 Content-Disposition: form-data; name="foo"
 Content-Type: text/plain; charset=utf-8
-Content-Length: 3
 
 bar
 --XYZXYZXYZ--
@@ -268,13 +252,11 @@ bar
         expected = unix2dos("""--XYZXYZXYZ
 Content-Disposition: form-data; name="key"
 Content-Type: text/plain; charset=utf-8
-Content-Length: 6
 
 value1
 --XYZXYZXYZ
 Content-Disposition: form-data; name="key"
 Content-Type: text/plain; charset=utf-8
-Content-Length: 6
 
 value2
 --XYZXYZXYZ--
@@ -295,7 +277,6 @@ value2
         expected = unix2dos("""--XYZXYZXYZ
 Content-Disposition: form-data; name="foo"
 Content-Type: text/plain; charset=utf-8
-Content-Length: 9
 
 file data
 --XYZXYZXYZ--

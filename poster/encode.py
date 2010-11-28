@@ -195,11 +195,6 @@ class MultipartParam(object):
 
         headers.append("Content-Type: %s" % filetype)
 
-        if self.filesize is not None:
-            headers.append("Content-Length: %i" % self.filesize)
-        else:
-            headers.append("Content-Length: %i" % len(self.value))
-
         headers.append("")
         headers.append("")
 
