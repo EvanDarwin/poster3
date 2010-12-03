@@ -22,6 +22,11 @@ except ImportError:
         return sha.new(str(bits)).hexdigest()
 
 import urllib, re, os, mimetypes
+try:
+    from email.header import Header
+except ImportError:
+    # Python 2.4
+    from email.Header import Header
 
 def encode_and_quote(data):
     """If ``data`` is unicode, return urllib.quote_plus(data.encode("utf-8"))
@@ -76,7 +81,7 @@ class MultipartParam(object):
     """
     def __init__(self, name, value=None, filename=None, filetype=None,
                         filesize=None, fileobj=None, cb=None):
-        self.name = encode_and_quote(name)
+        self.name = Header(name).encode()
         self.value = _strify(value)
         if filename is None:
             self.filename = None

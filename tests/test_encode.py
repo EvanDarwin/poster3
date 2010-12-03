@@ -19,15 +19,25 @@ bar
         self.assertEqual(expected,
                 poster.encode.encode_string("XXXXXXXXX", "foo", "bar"))
 
-    def test_quote_name(self):
+    def test_quote_name_space(self):
         expected = unix2dos("""--XXXXXXXXX
-Content-Disposition: form-data; name="foo+baz"
+Content-Disposition: form-data; name="foo baz"
 Content-Type: text/plain; charset=utf-8
 
 bar
 """)
         self.assertEqual(expected,
                 poster.encode.encode_string("XXXXXXXXX", "foo baz", "bar"))
+
+    def test_quote_unicode_name(self):
+        expected = unix2dos("""--XXXXXXXXX
+Content-Disposition: form-data; name="=?utf-8?b?4piD?="
+Content-Type: text/plain; charset=utf-8
+
+bar
+""")
+        self.assertEqual(expected,
+                poster.encode.encode_string("XXXXXXXXX", u"\N{SNOWMAN}", "bar"))
 
     def test_quote_value(self):
         expected = unix2dos("""--XXXXXXXXX

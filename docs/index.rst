@@ -101,7 +101,7 @@ Roadmap
     - Added poster.version attribute.  Thanks to JP Calderone.
     - Handle StringIO file objects.  Thanks to Christophe Combelles.
 
-0.7 (2010-10-23):
+0.7.0 (2010-10-23):
     - Added callback parameters to MutipartParam and multipart_encode so you
       can add progress indicators to your applications.  Thanks to Ludvig
       Ericson for the suggestion.
@@ -112,6 +112,13 @@ Roadmap
       key corresponding to the parameter in the dict.  Thanks to Matthew King
       for the suggestion.
     - poster now works under python2.7
+
+0.8.0 (TBD):
+    - Fixed parameter name encoding so that it follows RFC 2388,2047.  Thanks
+      to Emilien Klein for pointing this out.
+    - Don't include Content-Length header for each part of the multipart
+      message.  Fixes issues with some ruby web servers.  Thanks to Anders
+      Pearson.
 
 0.9 (future):
     - Finalize API
