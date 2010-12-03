@@ -29,6 +29,16 @@ bar
         self.assertEqual(expected,
                 poster.encode.encode_string("XXXXXXXXX", "foo baz", "bar"))
 
+    def test_quote_name_phparray(self):
+        expected = unix2dos("""--XXXXXXXXX
+Content-Disposition: form-data; name="files[]"
+Content-Type: text/plain; charset=utf-8
+
+bar
+""")
+        self.assertEqual(expected,
+                poster.encode.encode_string("XXXXXXXXX", "files[]", "bar"))
+
     def test_quote_unicode_name(self):
         expected = unix2dos("""--XXXXXXXXX
 Content-Disposition: form-data; name="=?utf-8?b?4piD?="
