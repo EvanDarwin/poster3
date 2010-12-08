@@ -139,6 +139,10 @@ Download
 --------
 poster can be downloaded from http://atlee.ca/software/poster/dist/0.7.0
 
+Source & Bugs
+-------------
+The source code and issue tracker are currently hosted on
+http://bitbucket.org/chrisatlee/poster
 
 License
 -------
