@@ -113,7 +113,7 @@ Roadmap
       for the suggestion.
     - poster now works under python2.7
 
-0.8.0 (TBD):
+0.8.0 (2011-02-13):
     - Fixed parameter name encoding so that it follows RFC 2388,2047.  Thanks
       to Emilien Klein for pointing this out.
     - Don't include Content-Length header for each part of the multipart
