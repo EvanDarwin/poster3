@@ -137,7 +137,7 @@ Module reference
 
 Download
 --------
-poster can be downloaded from http://atlee.ca/software/poster/dist/0.7.0
+poster can be downloaded from http://atlee.ca/software/poster/dist/0.8.0
 
 Source & Bugs
 -------------
