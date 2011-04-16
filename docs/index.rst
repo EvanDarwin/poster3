@@ -120,6 +120,10 @@ Roadmap
       message.  Fixes issues with some ruby web servers.  Thanks to Anders
       Pearson.
 
+0.8.1 (2011-04-16):
+    - Factor out handler creation into get_handlers() method. Thanks to Flavio
+      Percoco Premoli
+
 0.9 (future):
     - Finalize API
 
@@ -137,7 +141,7 @@ Module reference
 
 Download
 --------
-poster can be downloaded from http://atlee.ca/software/poster/dist/0.8.0
+poster can be downloaded from http://atlee.ca/software/poster/dist/0.8.1
 
 Source & Bugs
 -------------
