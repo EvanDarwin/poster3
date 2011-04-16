@@ -124,6 +124,8 @@ Roadmap
     - Factor out handler creation into get_handlers() method. Thanks to Flavio
       Percoco Premoli
 
+0.8.2 TBD
+
 0.9 (future):
     - Finalize API
 
