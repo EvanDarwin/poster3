@@ -10,6 +10,11 @@ __all__ = ['gen_boundary', 'encode_and_quote', 'MultipartParam',
         'multipart_encode']
 
 try:
+    from io import UnsupportedOperation
+except ImportError:
+    UnsupportedOperation = None
+
+try:
     import uuid
     def gen_boundary():
         """Returns a random string to use as the boundary for a message"""
@@ -106,7 +111,7 @@ class MultipartParam(object):
             # Try and determine the file size
             try:
                 self.filesize = os.fstat(fileobj.fileno()).st_size
-            except (OSError, AttributeError):
+            except (OSError, AttributeError, UnsupportedOperation):
                 try:
                     fileobj.seek(0, 2)
                     self.filesize = fileobj.tell()
