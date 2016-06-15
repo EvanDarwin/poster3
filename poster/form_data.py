@@ -7,10 +7,11 @@ from collections import OrderedDict
 import os
 import re
 
-try:
+try:  # pragma: no cover
     from urllib import quote_plus
-except ImportError:
+except ImportError:  # pragma: no cover
     from urllib.parse import quote_plus
+
 
 class FormData(object):
     def __init__(self, name, content, filename=None, mime_type=None, cb=None):

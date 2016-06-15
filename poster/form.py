@@ -2,9 +2,9 @@ from .form_data import FormData
 
 import uuid
 
-try:
+try:  # pragma: no cover
     from urllib import quote_plus
-except ImportError:
+except ImportError:  # pragma: no cover
     from urllib.parse import quote_plus
 
 

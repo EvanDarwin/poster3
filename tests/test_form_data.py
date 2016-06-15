@@ -1,6 +1,6 @@
 from tests import TestCase
 
-from poster import Form, FormData
+from poster import FormData
 from tempfile import NamedTemporaryFile
 
 
