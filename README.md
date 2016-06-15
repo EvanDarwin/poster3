@@ -1,4 +1,9 @@
 # poster3
+
+[![Build Status](https://travis-ci.org/EvanDarwin/poster3.svg?branch=master)](https://travis-ci.org/EvanDarwin/poster3)
+[![Code Climate](https://codeclimate.com/repos/5760c4b809032d008c000f30/badges/430cabb9787dadaec57b/gpa.svg)](https://codeclimate.com/repos/5760c4b809032d008c000f30/feed)
+[![Test Coverage](https://codeclimate.com/repos/5760c4b809032d008c000f30/badges/430cabb9787dadaec57b/coverage.svg)](https://codeclimate.com/repos/5760c4b809032d008c000f30/coverage)
+
 ##### A fork from Chris AtLee's poster package, available [on Bitbucket](https://bitbucket.org/chrisatlee/poster).  
 
 **poster provides a set of classes and functions to faciliate making HTTP POST (or PUT) requests using the standard multipart/form-data encoding.**

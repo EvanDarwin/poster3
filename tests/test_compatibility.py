@@ -37,7 +37,7 @@ class TestCompatibility(TestCase):
         self.assertGreater(response.find(expected_foo), -1)
         self.assertGreater(response.find(expected_hello), -1)
 
-        self.assertEqual('373', headers.get('Content-Length'))
+        self.assertEqual('327', headers.get('Content-Length'))
         self.assertEqual('multipart/form-data; boundary=--' + boundary,
                          headers.get('Content-Type'))
 
