@@ -164,7 +164,7 @@ resp = requests.post('http://localhost/upload', content=content,
 
 ## Changelog
 
-#### 0.9.0 (June 14, 2016)
+### 0.9.0 (June 14, 2016)
 - Added support for ***both Python 2.7+ and 3.2+***.
 - Cleaned out a lot of code, removed old imports and weird conditions.
 - Refactored a lot of `MultipartParam` into the `poster.multipart.Parameter` class *(the APIs have changed)*
@@ -177,6 +177,8 @@ resp = requests.post('http://localhost/upload', content=content,
 - Added more thorough tests for both Python 2/3
 - Travis CI now builds on all Python versions
 - Removed streaming HTTP helpers, if needed, can be reimplemented.
+
+For more information about migrating to the new API in 0.9.0, read the [migration guide](https://github.com/EvanDarwin/poster3/wiki/Migration-from-0.8.1-to-0.9-)
 
 ### 0.8.1 (April 16, 2011)
 - Factor out handler creation into get_handlers() method. Thanks to Flavio Percoco Premoli
