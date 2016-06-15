@@ -9,7 +9,7 @@ except ImportError:
 
 
 class Form(object):
-    def __init__(self, data=None):
+    def __init__(self, data=None, boundary=None):
         """
         Creates a new Form object, which is used to generate the
         multipart http form response.
@@ -19,7 +19,7 @@ class Form(object):
                         in as a list.
 
                         Example:
-                        >>> form = Form(FormData('a', 'b'))
+                        >>> form = Form([FormData('a', 'b')])
 
         :type data:     list
         """
@@ -27,8 +27,12 @@ class Form(object):
         # See if the user provided data, otherwise fallback
         self.data = data or []
 
-        # Generate a new unique random string for the boundary
-        self.boundary = quote_plus(uuid.uuid4().hex)
+        if boundary and isinstance(boundary, str):
+            # Use the user provided boundary
+            self.boundary = quote_plus(boundary.replace(' ', '+'))
+        else:
+            # Generate a new unique random string for the boundary
+            self.boundary = quote_plus(uuid.uuid4().hex)
 
         # Check that the parameters given is a list
         if not isinstance(self.data, list):

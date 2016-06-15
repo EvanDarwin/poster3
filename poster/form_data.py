@@ -7,6 +7,10 @@ from collections import OrderedDict
 import os
 import re
 
+try:
+    from urllib import quote_plus
+except ImportError:
+    from urllib.parse import quote_plus
 
 class FormData(object):
     def __init__(self, name, content, filename=None, mime_type=None, cb=None):
@@ -170,7 +174,7 @@ class FormData(object):
         :type boundary: str
         """
 
-        self.boundary = boundary
+        self.boundary = quote_plus(boundary)
 
     @property
     def headers(self):

@@ -68,10 +68,39 @@ class TestForm(TestCase):
         self.assertRaises(ValueError, form.add_file, 'abc4', '')
 
     def test_add_data_invalid_name(self):
-        pass
+        form = Form()
+
+        self.assertRaises(ValueError, form.add_data, None, '')
+        self.assertRaises(ValueError, form.add_data, False, '')
+        self.assertRaises(ValueError, form.add_data, True, '')
+        self.assertRaises(ValueError, form.add_data, 123, '')
 
     def test_add_data_invalid_content(self):
-        pass
+        form = Form()
+
+        self.assertRaises(ValueError, form.add_data, 'abc1', None)
+        self.assertRaises(ValueError, form.add_data, 'abc2', False)
+        self.assertRaises(ValueError, form.add_data, 'abc3', True)
+        self.assertRaises(ValueError, form.add_data, 'abc4', 123)
+        self.assertRaises(ValueError, form.add_data, 'abc4', dict())
+
+    def test_add_form_data(self):
+        form = Form()
+        data = FormData('foo', 'bar')
+
+        form.add_form_data(data)
+
+        self.assertEqual('foo', form.data[0].name)
+        self.assertEqual([data], form.data)
+
+    def test_add_form_data_invalid_type(self):
+        form = Form()
+
+        self.assertRaises(ValueError, form.add_form_data, None)
+        self.assertRaises(ValueError, form.add_form_data, False)
+        self.assertRaises(ValueError, form.add_form_data, '')
+        self.assertRaises(ValueError, form.add_form_data, {})
+        self.assertRaises(ValueError, form.add_form_data, 123)
 
     def test_add_parameter(self):
         pass
@@ -80,4 +109,41 @@ class TestForm(TestCase):
         pass
 
     def test_encode(self):
-        pass
+        with NamedTemporaryFile() as f:
+            f.write(b'hello_world')
+            f.flush()
+
+            form = Form()
+            form.add_data('foo', 'bar')
+            form.add_data('a space', 'hello')
+            form.add_data('arr[]', 'hello2')
+            form.add_file('hello', f)
+
+            contents, headers = form.encode()
+
+            expected = '\r\n'.join("""--{0}
+Content-Disposition: form-data; name="foo"
+Content-Type: text/plain; charset=utf-8
+
+bar
+--{0}
+Content-Disposition: form-data; name="a space"
+Content-Type: text/plain; charset=utf-8
+
+hello
+--{0}
+Content-Disposition: form-data; name="arr[]"
+Content-Type: text/plain; charset=utf-8
+
+hello2
+--{0}
+Content-Disposition: form-data; name="hello"; filename="{1}"
+Content-Type: text/plain; charset=utf-8
+
+hello_world
+--{0}--""".split('\n')).format(form.boundary, f.name)
+
+            self.assertEqual(expected, contents)
+
+    def test_boundary_space(self):
+        form = Form()
