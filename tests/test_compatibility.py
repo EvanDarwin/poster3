@@ -17,29 +17,29 @@ class TestCompatibility(TestCase):
                 'hello': file,
             })
 
-            response = response.decode('utf-8')
             boundary = response[-34:-2]
 
         expected_foo = '\r\n'.join([
             '--' + boundary,
             'Content-Disposition: form-data; name="foo"',
             'Content-Type: text/plain; charset=utf-8',
-            '', '', 'bar'
-        ])
+            '', 'bar'
+        ]).strip()
 
         expected_hello = '\r\n'.join([
             '--' + boundary,
             'Content-Disposition: form-data; name="hello"; filename="{}"'.format(file.name),
             'Content-Type: text/plain; charset=utf-8',
-            '', '', 'world'
-        ])
+            '', 'world'
+        ]).strip()
 
         self.assertGreater(response.find(expected_foo), -1)
         self.assertGreater(response.find(expected_hello), -1)
 
-        self.assertEqual('327', headers.get('Content-Length'))
-        self.assertEqual('multipart/form-data; boundary=--' + boundary,
-                         headers.get('Content-Type'))
+        self.assertIn('Content-Length', list(headers.keys()))
+        self.assertIn('Content-Type', list(headers.keys()))
+
+        self.assertEqual('multipart/form-data; boundary=--' + boundary, headers.get('Content-Type'))
 
     def test_multipart_encode_list(self):
         with tempfile.NamedTemporaryFile('w+b') as file:

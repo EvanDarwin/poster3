@@ -1,11 +1,13 @@
-from poster.multipart import Multipart, Parameter
+from poster import Form, FormData
 
 
 def multipart_encode(parameters):
-    form = Multipart()
+    # TODO: REWRITE CODE
+
+    form = Form()
 
     if isinstance(parameters, list):
-        if not all([isinstance(x, Parameter) for x in parameters]):
+        if not all([isinstance(x, FormData) for x in parameters]):
             raise ValueError('All instances must be of type Parameter when providing a list')
 
         form.parameters += parameters
@@ -30,6 +32,6 @@ class MultipartParam(object):
             if not os.path.exists(path):
                 raise IOError('\'{}\' could not be located'.format(path))
 
-            return Parameter(name, open(path, 'rb'))
+            return FormData(name, open(path, 'rb'))
         else:
-            return Parameter(name, path)
+            return FormData(name, path)

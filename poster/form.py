@@ -1,4 +1,4 @@
-from . import Parameter
+from .form_data import FormData
 
 import uuid
 
@@ -8,35 +8,33 @@ except ImportError:
     from urllib.parse import quote_plus
 
 
-class Multipart(object):
-    def __init__(self, parameters=None):
-        self.parameters = parameters or []
+class Form(object):
+    def __init__(self, data=None):
+        self.data = data or []
         self.boundary = quote_plus(uuid.uuid4().hex)
 
         # Check that the parameters given is a dictionary
-        if not isinstance(self.parameters, list):
-            raise ValueError('Parameters list must be of type list, is type {}'.format(type(self.parameters).__name__))
+        if not isinstance(self.data, list):
+            raise ValueError('data list must be of type list, is type {}'.format(type(self.data).__name__))
 
-        if not all([isinstance(x, Parameter) for x in self.parameters]):
-            raise TypeError('All objects in list must be of type Parameter')
+        if not all([isinstance(x, FormData) for x in self.data]):
+            raise TypeError('All objects in list must be of type FormData')
 
         # Update the list
-        for parameter in self.parameters:
+        for parameter in self.data:
             parameter.set_boundary(self.boundary)
 
     def add_file(self, name, fh, filename=None, mime_type=None):
         if not name or not isinstance(name, str):
             raise ValueError('You must provide a valid name')
 
-        if not fh:
+        if not fh or not hasattr(fh, 'read'):
             raise ValueError('You must provide a valid file handler')
 
-        filename = fh.name if fh and not filename else filename
+        data = FormData(name, fh, filename=filename, mime_type=mime_type)
+        self.add_form_data(data)
 
-        parameter = Parameter(name, fh, filename=filename, mime_type=mime_type)
-        self.add_parameter(parameter)
-
-        return parameter
+        return data
 
     def add_data(self, name, content):
         if not name:
@@ -45,17 +43,17 @@ class Multipart(object):
         if not content:
             raise ValueError('You must provide valid content')
 
-        parameter = Parameter(name, content)
-        self.add_parameter(parameter)
+        data = FormData(name, content)
+        self.add_form_data(data)
 
-        return parameter
+        return data
 
-    def add_parameter(self, parameter):
-        if not isinstance(parameter, Parameter):
+    def add_form_data(self, form_data):
+        if not isinstance(form_data, FormData):
             raise ValueError(
-                'Multipart requires parameters to be of type Parameter, is \'{}\''.format(type(parameter).__name__))
+                'Multipart requires form_data to be of type FormData, is \'{}\''.format(type(form_data).__name__))
 
-        self.parameters.append(parameter)
+        self.data.append(form_data)
 
     def encode(self, cb=None):
         """
@@ -89,23 +87,24 @@ class Multipart(object):
 
         # [parameters] * [param. length] + '--' + [boundary] + '--' + \r\n
         #                              |||   2  +     32     +  2   +   2   =   38 bytes
-        total = sum(p.content_length for p in self.parameters) + 38
+        total = sum(len(p) for p in self.data) + 38
 
-        for parameter in self.parameters:
-            parameter.set_boundary(self.boundary)
+        for field in self.data:
+            field.set_boundary(self.boundary)
 
-            block = parameter.encode()
+            block = field.encode()
             position += len(block)
 
             content += block
 
             if cb:
-                cb(parameter, position, total)
+                cb(field, position, total)
 
         content += '--{}--'.format(self.boundary)
+
         headers = {
             'Content-Type': 'multipart/form-data; boundary=--{}'.format(self.boundary),
             'Content-Length': str(len(content)),
         }
 
-        return content.encode('utf-8'), headers
+        return content, headers

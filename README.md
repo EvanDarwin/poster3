@@ -21,11 +21,11 @@ The `poster3` package publishes the same APIs as used in the `poster` package, h
 In the **0.9** release, many of the scattered functions in `poster` are now managed by objects, many of which are handled for you.
 
 ```python
-from poster.multipart import Multipart
+from poster import Form
 import requests  # For demonstration
 
 # Create a new multipart form
-form = Multipart()
+form = Form()
 
 # Add an image object
 form.add_file('image', open('upload.jpg', 'rb'))
@@ -115,15 +115,15 @@ After starting up the server, you should be able to connect to it with the clien
 image1: FieldStorage('image1', 'DSC0001.jpg')
 ```
 
-## Parameters
+## FormData
 
-One of the core classes in the `poster` API is the concept of a parameter, a key value pair that has a value, whether it be a `File`-like object or a `str`.
+One of the core classes in the `poster` API is the concept of a **FormData** object, a key value pair that has a value, whether it be a `File`-like object or is a `str`.
 
-For every element you want to send in your multipart HTTP form, you will need to add a new parameter. However, in most cases when you use `poster`, you won't need to create these `Parameter` objects on your own.
+For every element you want to send in your multipart HTTP form, you will need to add a new FormData object. However, in most cases when you use `poster`, you won't need to create these objects on your own.
 
 Here's a quick guide:
 ```python
-from poster.multipart imort Multipart, Parameter
+from poster import Form, FormData
 
 # The boundary is a random string used to separate data
 boundary = 'mycustomboundary'
@@ -133,7 +133,7 @@ boundary = 'mycustomboundary'
 def cb(parameter, current, total):
     print('CB: {}/{} bytes!'.format(current, total))
 
-form = Multipart()
+form = Form()
 
 # Create it automatically (provides the same parameters)
 form.add_file('photo', open('profile.jpg', 'rb'),
@@ -141,21 +141,22 @@ form.add_file('photo', open('profile.jpg', 'rb'),
              mime_type='image/jpg',  # If you want to override it
              cb=cb)                  # Add a progress callback
                  
-# Add the 'description' parameter to the form
-form.add_parameter(param)
+# Create it the hard way
+data = FormData('foo', 'bar')
+form.add_form_data(data)
 ```
 
-## Multipart Form
+## Form
 
 The `Multipart` class collects attributes and encodes the data into a HTTP multipart format.
 
 ```python
-from poster.multipart import Multipart, Parameter
+from poster import Form, FormData
 
-form = Multipart()
+form = Form()
 form.add_file('profile', open('profile.jpg', 'rb'))
 form.add_data('foo', 'bar')
-form.add_parameter(Parameter('hello', 'world'))
+form.add_form_data(FormData('hello', 'world'))
 
 # Encode it into a multipart string
 content, headers = form.encode()
@@ -172,13 +173,13 @@ resp = requests.post('http://localhost/upload', content=content,
 ### 0.9.0 (June 14, 2016)
 - Added support for ***both Python 2.7+ and 3.2+***.
 - Cleaned out a lot of code, removed old imports and weird conditions.
-- Refactored a lot of `MultipartParam` into the `poster.multipart.Parameter` class *(the APIs have changed)*
+- Refactored a lot of `MultipartParam` into the `poster.FormData` class *(the APIs have changed)*
 - The following functions and attributes will be **deprecated and *removed*** in *version 1.0.0*:
     - Using the `poster.encode.MultipartParam` class
     - `poster.streaminghttp.register_openers()`
     - `poster.encode.multipart_encode()`
     - Accessing the `poster.version` tuple
-- Encoding is now handled by the `Multipart` object, allowing you to add attributes easily
+- Encoding is now handled by the `Form` object, allowing you to add data easily
 - Added more thorough tests for both Python 2/3
 - Travis CI now builds on all Python versions
 - Removed streaming HTTP helpers, if needed, can be reimplemented.
